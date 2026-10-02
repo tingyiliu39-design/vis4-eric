@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eric's Stitch Controller</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="stage">
+
+        <!-- LEFT: what the user sets -->
+        <section class="controls">
+
+            <!-- Stitch pattern selector -->
+            <div class="control">
+                <h2 class="label label-pattern">Stitch Pattern</h2>
+
+                <div class="options">
+                    <!-- pattern 1: straight -->
+                    <span class="dot" style="--x:688.5; --y:283.5; --r:4.5"></span>
+                    <span class="dot" style="--x:688.5; --y:316.5; --r:4.5"></span>
+                    <!-- pattern 2: zigzag -->
+                    <span class="dot" style="--x:743.5; --y:283.5; --r:4.5"></span>
+                    <span class="dot" style="--x:743.5; --y:305.5; --r:4.5"></span>
+                    <span class="dot" style="--x:776.5; --y:294.5; --r:4.5"></span>
+                    <span class="dot" style="--x:776.5; --y:316.5; --r:4.5"></span>
+                    <!-- pattern 3: cross -->
+                    <span class="dot" style="--x:826.5; --y:289.5; --r:4.5"></span>
+                    <span class="dot" style="--x:848.5; --y:289.5; --r:4.5"></span>
+                    <span class="dot" style="--x:826.5; --y:311.5; --r:4.5"></span>
+                    <span class="dot" style="--x:848.5; --y:311.5; --r:4.5"></span>
+                </div>
+
+                <div class="slider slider-pattern">
+                    <div class="slider-handle"></div>
+                </div>
+            </div>
+
+            <!-- Speed selector -->
+            <div class="control">
+                <h2 class="label label-speed">Speed</h2>
+
+                <div class="options">
+                    <span class="dot dot-off" style="--x:685;   --y:659; --r:7"></span>
+                    <span class="dot" style="--x:703;   --y:659; --r:1"></span>
+                    <span class="dot" style="--x:712.5; --y:659; --r:1.5"></span>
+                    <span class="dot" style="--x:723;   --y:659; --r:2"></span>
+                    <span class="dot" style="--x:734.5; --y:659; --r:2.5"></span>
+                    <span class="dot" style="--x:747;   --y:659; --r:3"></span>
+                    <span class="dot" style="--x:760.5; --y:659; --r:3.5"></span>
+                    <span class="dot" style="--x:775;   --y:659; --r:4"></span>
+                    <span class="dot" style="--x:791;   --y:659; --r:5"></span>
+                    <span class="dot" style="--x:811;   --y:659; --r:6"></span>
+                    <span class="dot" style="--x:833;   --y:659; --r:7"></span>
+                </div>
+
+                <div class="slider slider-speed">
+                    <div class="slider-handle"></div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT: the device screen — what it tells the user + start/stop -->
+        <section class="device">
+            <!-- selected stitch preview -->
+            <img class="stitch-preview" src="images/stitch-zigzag.png" alt="Selected stitch: zigzag">
+
+            <!-- progress / battery readout -->
+            <img class="readout" src="images/display-05.png" alt="Progress 05%">
+
+            <!-- start button -->
+            <button class="start-button" type="button">
+                <span class="start-label">START</span>
+            </button>
+        </section>
+
+    </main>
+
+</body>
+</html>

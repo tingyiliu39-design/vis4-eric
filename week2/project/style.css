@@ -1,0 +1,185 @@
+/* ------------------------------------------------------------
+   Stitch Controller — Week 2 project interface (static)
+   All sizes are taken 1:1 from the 1920 x 1080 design.
+   --u = one design pixel, scaled so the whole stage fits the window.
+   ------------------------------------------------------------ */
+
+@font-face {
+    font-family: "Stitch Display";
+    src: url("fonts/stitch-display.otf") format("opentype");
+}
+
+:root {
+    --u: min(calc(100vw / 1920), calc(100vh / 1080));
+
+    --white: #ffffff;
+    --black: #000000;
+    --panel: #e9e9e9;
+    --track: #5d5d5d;
+    --yellow: #faeb28;
+    --button-face: #e5e5e5;
+    --button-text: #5d5d5d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+    background-color: var(--white);
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* 1920 x 1080 artboard */
+.stage {
+    position: relative;
+    width: calc(1920 * var(--u));
+    height: calc(1080 * var(--u));
+    background-color: var(--white);
+    font-family: "Stitch Display", sans-serif;
+}
+
+/* ---------- Labels ---------- */
+.label {
+    position: absolute;
+    right: calc((1920 - 601.6) * var(--u));
+    margin: 0;
+    font-size: calc(32 * var(--u));
+    font-weight: normal;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--black);
+    white-space: nowrap;
+}
+
+.label-pattern {
+    top: calc(243.4 * var(--u));
+}
+
+.label-speed {
+    top: calc(582.4 * var(--u));
+}
+
+/* ---------- Option dots ---------- */
+/* each dot gets its centre (--x, --y) and radius (--r) from the HTML */
+.dot {
+    position: absolute;
+    left: calc((var(--x) - var(--r)) * var(--u));
+    top: calc((var(--y) - var(--r)) * var(--u));
+    width: calc(var(--r) * 2 * var(--u));
+    height: calc(var(--r) * 2 * var(--u));
+    border-radius: 50%;
+    background-color: var(--black);
+}
+
+/* "off" / zero-speed marker: hollow circle */
+.dot-off {
+    background-color: var(--white);
+    border: calc(1 * var(--u)) solid var(--black);
+}
+
+/* ---------- Sliders ---------- */
+.slider {
+    position: absolute;
+    left: calc(652 * var(--u));
+    width: calc(217 * var(--u));
+    height: calc(76 * var(--u));
+    border-radius: calc(38 * var(--u));
+    background-color: var(--track);
+    box-shadow: inset 0 calc(3 * var(--u)) calc(4 * var(--u)) rgba(0, 0, 0, 0.3);
+}
+
+.slider-pattern {
+    top: calc(339 * var(--u));
+}
+
+.slider-speed {
+    top: calc(678 * var(--u));
+}
+
+.slider-handle {
+    position: absolute;
+    left: calc(100 * var(--u));
+    top: calc(3 * var(--u));
+    width: calc(16 * var(--u));
+    height: calc(70 * var(--u));
+    border-radius: calc(8 * var(--u));
+    border: calc(1 * var(--u)) solid transparent;
+    background:
+        linear-gradient(var(--yellow), var(--yellow)) padding-box,
+        linear-gradient(#d8d8d8, #010101) border-box;
+    box-shadow: 0 calc(3 * var(--u)) calc(4 * var(--u)) rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- Device panel ---------- */
+.device {
+    position: absolute;
+    left: calc(1002 * var(--u));
+    top: calc(80 * var(--u));
+    width: calc(313 * var(--u));
+    height: calc(920 * var(--u));
+    border-radius: calc(156.5 * var(--u));
+    background-color: var(--panel);
+}
+
+/* positions inside the panel are design coordinates minus the panel origin (1002, 80) */
+.stitch-preview {
+    position: absolute;
+    left: calc((1043 - 1002) * var(--u));
+    top: calc((224.79 - 80) * var(--u));
+    width: calc(230 * var(--u));
+    height: calc(24.42 * var(--u));
+}
+
+.readout {
+    position: absolute;
+    left: calc((1045 - 1002) * var(--u));
+    top: calc((602 - 80) * var(--u));
+    width: calc(226 * var(--u));
+    height: calc(89 * var(--u));
+}
+
+/* ---------- Start button ---------- */
+.start-button {
+    position: absolute;
+    left: calc((1092 - 1002) * var(--u));
+    top: calc((777 - 80) * var(--u));
+    width: calc(133 * var(--u));
+    height: calc(133 * var(--u));
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(#646464, #ffffff);
+    cursor: pointer;
+}
+
+/* inner face of the button */
+.start-button::before {
+    content: "";
+    position: absolute;
+    left: calc(10 * var(--u));
+    top: calc(10 * var(--u));
+    width: calc(113 * var(--u));
+    height: calc(113 * var(--u));
+    border-radius: 50%;
+    background-color: var(--button-face);
+    box-shadow: 0 calc(1.5 * var(--u)) calc(3 * var(--u)) rgba(0, 0, 0, 0.3);
+}
+
+.start-label {
+    position: relative;
+    display: block;
+    font-family: "Stitch Display", sans-serif;
+    font-size: calc(32 * var(--u));
+    line-height: 1;
+    color: var(--button-text);
+}
