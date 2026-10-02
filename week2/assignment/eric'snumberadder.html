@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eric's Number Adder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="header">
+        <h1>Eric's Number Adder</h1>
+        <h4>Item 1</h4>
+        <h4>Item 2</h4>
+        <h4>Item 3</h4>
+    </div>
+
+    <div class="container">
+        
+        <div class="sidebar">
+            <h3>Result</h3>
+            <p id="resultId">0</p>
+        </div>
+
+        <!-- Main content DIV -->
+        <div class="main-content">
+            <h3>Control Center</h3>
+            <div class="buttons">
+                <button id="minusTwo">-2</button>
+                <button id="minusOne">-1</button>
+                <button id="reset">Reset</button>
+                <button id="plusOne">+1</button>
+                <button id="plusTwo">+2</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var total = 0;
+
+        document.getElementById("minusTwo").addEventListener("click", function () {
+            total = total - 2;
+            document.querySelector("#resultId").innerHTML = total;
+        });
+
+        document.getElementById("minusOne").addEventListener("click", function () {
+            total = total - 1;
+            document.querySelector("#resultId").innerHTML = total;
+        });
+
+        document.getElementById("reset").addEventListener("click", function () {
+            total = 0;
+            document.querySelector("#resultId").innerHTML = total;
+        });
+
+        document.getElementById("plusOne").addEventListener("click", function () {
+            total = total + 1;
+            document.querySelector("#resultId").innerHTML = total;
+        });
+
+        document.getElementById("plusTwo").addEventListener("click", function () {
+            total = total + 2;
+            document.querySelector("#resultId").innerHTML = total;
+        });
+    </script>
+</body>
+</html>
