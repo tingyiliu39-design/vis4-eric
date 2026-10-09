@@ -37,30 +37,33 @@
 
     <script>
         var total = 0;
+        function updateResults(){
+            document.querySelector("#resultId").innerHTML= total;
+        }
 
         document.getElementById("minusTwo").addEventListener("click", function () {
             total = total - 2;
-            document.querySelector("#resultId").innerHTML = total;
+            updateResults();
         });
 
         document.getElementById("minusOne").addEventListener("click", function () {
             total = total - 1;
-            document.querySelector("#resultId").innerHTML = total;
+            updateResults();
         });
 
         document.getElementById("reset").addEventListener("click", function () {
             total = 0;
-            document.querySelector("#resultId").innerHTML = total;
+            updateResults();
         });
 
         document.getElementById("plusOne").addEventListener("click", function () {
             total = total + 1;
-            document.querySelector("#resultId").innerHTML = total;
+            updateResults();
         });
 
         document.getElementById("plusTwo").addEventListener("click", function () {
             total = total + 2;
-            document.querySelector("#resultId").innerHTML = total;
+            updateResults();
         });
     </script>
 </body>

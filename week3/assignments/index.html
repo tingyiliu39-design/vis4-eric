@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eric's Number Adder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="header">
+        <h1>Eric's Number Adder</h1>
+        <h4>Item 1</h4>
+        <h4>Item 2</h4>
+        <h4>Item 3</h4>
+    </div>
+
+    <div class="container">
+
+        <div class="sidebar">
+            <h3>Result</h3>
+            <p id="resultId">0</p>
+            <p id="totalMessage"></p>
+
+            <div id="summary"></div>
+
+            <h3>History</h3>
+            <p class="hint">Click an item to remove it</p>
+            <ul id="historyList"></ul>
+        </div>
+
+        <div class="main-content">
+            <h3>Control Center</h3>
+            <div class="buttons">
+                <button id="minusTwo">-2</button>
+                <button id="minusOne">-1</button>
+                <button id="reset">Reset</button>
+                <button id="plusOne">+1</button>
+                <button id="plusTwo">+2</button>
+            </div>
+
+            <button id="clearAll" class="clear-button">Clear History &amp; Results</button>
+        </div>
+    </div>
+
+    <script>
+        var total = 0;
+        let history = [];
+        let operationCount = { additions: 0, subtractions: 0 };
+
+        function updateResults() {
+            document.querySelector("#resultId").innerHTML = total;
+            updateHistory();   // Step 1
+            updateSummary();   // Step 2
+            checkTotal();      // Step 3
+        }
+
+        // Step 1: history array + for loop (with bonus: click to remove)
+        function updateHistory() {
+            let historyContent = "";
+
+            for (let i = 0; i < history.length; i++) {
+                historyContent += "<li onclick='removeHistoryItem(" + i + ")'>" + history[i] + "</li>";
+            }
+
+            document.querySelector("#historyList").innerHTML = historyContent;
+        }
+
+        // Bonus: remove one history item with splice()
+        function removeHistoryItem(index) {
+            history.splice(index, 1);
+            updateHistory();
+        }
+
+        // Step 2: summary from the operationCount object
+        function updateSummary() {
+            document.querySelector("#summary").innerHTML =
+                `Total additions: ${operationCount.additions}, <br> Total subtractions: ${operationCount.subtractions}`;
+        }
+
+        // Step 3: conditional message
+        function checkTotal() {
+            if (total > 0) {
+                document.querySelector("#totalMessage").innerHTML = "The total is positive.";
+            } else if (total < 0) {
+                document.querySelector("#totalMessage").innerHTML = "The total is negative.";
+            } else {
+                document.querySelector("#totalMessage").innerHTML = "The total is zero.";
+            }
+        }
+
+        // Step 4: clear everything
+        function ClearAll() {
+            total = 0;
+            history = [];
+            operationCount.additions = 0;
+            operationCount.subtractions = 0;
+            updateResults();
+        }
+
+        // Step 5: button listeners
+        document.getElementById("minusTwo").addEventListener("click", function () {
+            total = total - 2;
+            history.push("-2");
+            operationCount.subtractions = operationCount.subtractions + 1;
+            updateResults();
+        });
+
+        document.getElementById("minusOne").addEventListener("click", function () {
+            total = total - 1;
+            history.push("-1");
+            operationCount.subtractions = operationCount.subtractions + 1;
+            updateResults();
+        });
+
+        document.getElementById("reset").addEventListener("click", function () {
+            total = 0;
+            history.push("Reset");
+            updateResults();
+        });
+
+        document.getElementById("plusOne").addEventListener("click", function () {
+            total = total + 1;
+            history.push("+1");
+            operationCount.additions = operationCount.additions + 1;
+            updateResults();
+        });
+
+        document.getElementById("plusTwo").addEventListener("click", function () {
+            total = total + 2;
+            history.push("+2");
+            operationCount.additions = operationCount.additions + 1;
+            updateResults();
+        });
+
+        document.getElementById("clearAll").addEventListener("click", function () {
+            ClearAll();
+        });
+
+        // show the starting state (summary + "The total is zero.")
+        updateResults();
+    </script>
+</body>
+</html>
