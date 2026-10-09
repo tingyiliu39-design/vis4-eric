@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Handheld Sewing Machine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="screen" data-pattern="straight">
+
+        <!-- Title -->
+        <h1 class="title">Handheld Sewing Machine</h1>
+
+        <!-- Stitch pattern card -->
+        <section class="card card-pattern">
+            <h2 class="card-label label-pattern">Stitch Pattern</h2>
+
+            <div class="options">
+                <!-- pattern 1: straight -->
+                <span class="dot" style="--x:54.5;  --y:136.5; --r:2.5"></span>
+                <span class="dot" style="--x:54.5;  --y:157.5; --r:2.5"></span>
+                <!-- pattern 2: zigzag -->
+                <span class="dot" style="--x:93.5;  --y:136.5; --r:2.5"></span>
+                <span class="dot" style="--x:93.5;  --y:150.5; --r:2.5"></span>
+                <span class="dot" style="--x:108.5; --y:143.5; --r:2.5"></span>
+                <span class="dot" style="--x:108.5; --y:157.5; --r:2.5"></span>
+                <!-- pattern 3: button (cross) -->
+                <span class="dot" style="--x:142.5; --y:140.5; --r:2.5"></span>
+                <span class="dot" style="--x:157.5; --y:140.5; --r:2.5"></span>
+                <span class="dot" style="--x:142.5; --y:154.5; --r:2.5"></span>
+                <span class="dot" style="--x:157.5; --y:154.5; --r:2.5"></span>
+            </div>
+
+            <div class="slider slider-pattern">
+                <div class="slider-handle handle-pattern"></div>
+            </div>
+
+            <!-- invisible tap targets: one column per pattern (dots + slider) -->
+            <div class="pattern-picker" id="patternPicker">
+                <button class="pattern-option option-straight" type="button" data-pattern="straight" aria-label="Straight stitch"></button>
+                <button class="pattern-option option-zigzag" type="button" data-pattern="zigzag" aria-label="Zigzag stitch (hemming)"></button>
+                <button class="pattern-option option-button" type="button" data-pattern="button" aria-label="Button stitch"></button>
+            </div>
+        </section>
+
+        <!-- Speed card -->
+        <section class="card card-speed">
+            <h2 class="card-label label-speed">Speed</h2>
+
+            <div class="options">
+                <span class="dot dot-off" style="--x:250.71; --y:160.71; --r:4.71"></span>
+                <span class="dot" style="--x:262.5; --y:160.71; --r:0.5"></span>
+                <span class="dot" style="--x:269;   --y:160.71; --r:1"></span>
+                <span class="dot" style="--x:276;   --y:160.71; --r:1"></span>
+                <span class="dot" style="--x:283.5; --y:160.71; --r:1.5"></span>
+                <span class="dot" style="--x:292;   --y:160.71; --r:2"></span>
+                <span class="dot" style="--x:301;   --y:160.71; --r:2"></span>
+                <span class="dot" style="--x:311.5; --y:160.71; --r:2.5"></span>
+                <span class="dot" style="--x:322;   --y:160.71; --r:3"></span>
+                <span class="dot" style="--x:335;   --y:160.71; --r:4"></span>
+                <span class="dot" style="--x:350.5; --y:160.71; --r:4.5"></span>
+            </div>
+
+            <div class="slider slider-speed">
+                <div class="slider-handle handle-speed"></div>
+            </div>
+        </section>
+
+        <!-- Status bar: the selected stitch is drawn here large (see stitch canvas below) -->
+        <section class="status-bar" id="status"></section>
+
+        <!-- Main card with the device display and start button -->
+        <section class="card card-main">
+            <div class="pill">
+                <!-- device display: only visible when the machine is on -->
+                <img class="display status-stitching for-straight" src="images/status-stitching.png" alt="Stitching">
+                <img class="display status-hemming for-zigzag" src="images/status-hemming.png" alt="Hemming">
+                <img class="display status-button for-button" src="images/status-button.png" alt="Button">
+
+                <img class="display display-battery" src="images/battery-05.png" alt="Battery 05%">
+
+                <button class="start-button" id="startButton" type="button" aria-label="Hold to turn on">
+                    <span class="start-label">Start</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Stitch drawing: preview in the pill + large version in the status bar.
+             Drawn by drawStitches() in design coordinates, so it can be resized. -->
+        <svg class="stitch-canvas" id="stitchCanvas" viewBox="0 0 402 874" aria-hidden="true"></svg>
+
+        <!-- Invisible pinch area over the stitch preview (pinch / scroll to resize) -->
+        <div class="zoom-area" id="zoomArea" aria-label="Pinch to change stitch size"></div>
+
+    </main>
+
+    <script>
+        // ---------- STATE ----------
+        // Everything the screen shows comes from these variables.
+        let machine = {
+            isOn: false,
+            stitchPattern: "straight",
+            status: "stitching",
+            stitchSize: 1,     // 1 = size in the design; pinch changes it
+            battery: 5
+        };
+
+        const MIN_SIZE = 0.6;
+        const MAX_SIZE = 1.8;
+
+        // the three stitch patterns, in slider order
+        // handleX = centre of the yellow handle in design pixels
+        const PATTERNS = [
+            { name: "straight", status: "stitching", handleX: 54.5 },
+            { name: "zigzag",   status: "hemming",   handleX: 100.5 },
+            { name: "button",   status: "button",    handleX: 150.5 }
+        ];
+
+        const HOLD_TIME = 1000;   // ms the START button must be held
+        let holdTimer = null;
+
+
+        // ---------- FAKE DEVICE ----------
+        // Pretends to be the Arduino. In Week 7 this is the one function
+        // that gets swapped for real messages from the hardware.
+        function fakeDevice(command, value) {
+            if (command === "power") {
+                machine.isOn = !machine.isOn;
+            }
+
+            if (command === "setStitchSize") {
+                if (machine.isOn) {
+                    // keep the size inside the range the machine supports
+                    machine.stitchSize = Math.min(MAX_SIZE, Math.max(MIN_SIZE, value));
+                }
+            }
+
+            if (command === "setPattern") {
+                // the machine only accepts a new pattern while it is on
+                if (machine.isOn) {
+                    machine.stitchPattern = value;
+                }
+            }
+
+            // the device reports a status that matches the pattern
+            for (let i = 0; i < PATTERNS.length; i++) {
+                if (PATTERNS[i].name === machine.stitchPattern) {
+                    machine.status = PATTERNS[i].status;
+                }
+            }
+
+            render();
+        }
+
+
+        // ---------- RENDER ----------
+        // One function redraws the page from the state.
+        function render() {
+            const screen = document.querySelector(".screen");
+            const startButton = document.querySelector("#startButton");
+
+            if (machine.isOn) {
+                screen.classList.add("is-on");
+                startButton.setAttribute("aria-label", "Hold to turn off");
+            } else {
+                screen.classList.remove("is-on");
+                startButton.setAttribute("aria-label", "Hold to turn on");
+            }
+
+            // CSS uses this to move the handle and pick which pictures to show
+            screen.dataset.pattern = machine.stitchPattern;
+
+            // mark the selected option for screen readers
+            const options = document.querySelectorAll(".pattern-option");
+            for (let i = 0; i < options.length; i++) {
+                const selected = options[i].dataset.pattern === machine.stitchPattern;
+                options[i].setAttribute("aria-pressed", selected);
+                options[i].disabled = !machine.isOn;
+            }
+
+            drawStitches();
+        }
+
+
+        // ---------- STITCH DRAWING ----------
+        // Draws the selected stitch in the pill (small) and in the status bar (large).
+        // All numbers are design pixels measured from the PDFs; "size" scales them.
+        function drawStitches() {
+            const size = machine.stitchSize;
+            let pill = "";
+            let bar = "";
+            let barSoft = false;
+
+            if (machine.stitchPattern === "straight") {
+                // pill: row of dashes, centred at x 206.5, y 414.7
+                pill = dashes(206.5, 414.7, 17.4 * size, 21.96 * size, 1.5 * size, 128);
+                // bar: larger dashes centred at x 116, y 279.5
+                bar = dashes(116, 279.5, 29.3 * size, 35 * size, 2 * size, 206);
+                barSoft = true;   // the bar dashes have a soft edge in the design
+            }
+
+            if (machine.stitchPattern === "zigzag") {
+                // pill: whole zigzags centred on x 206.35; the bottom stays at y 425.27
+                // so a bigger stitch grows upwards, away from the status badge
+                const pillHeight = 11.53 * size;
+                pill = zigzagCentred(206.35, 425.27 - pillHeight / 2, pillHeight, 1.3 * size, 132);
+                // bar: whole zigzags centred on x 108.5, y 276.85
+                bar = zigzagCentred(108.5, 276.85, 20.7 * size, 2 * size, 199);
+            }
+
+            if (machine.stitchPattern === "button") {
+                pill = fourDots(206.73, 414.13, 3.95 * size, 1.4 * size);
+                bar = fourDots(200.5, 276.5, 9 * size, 2.5 * size);
+            }
+
+            document.querySelector("#stitchCanvas").innerHTML =
+                // soft edge for the pill preview, like the glow in the design
+                '<defs>' +
+                    '<filter id="soft" filterUnits="userSpaceOnUse" x="110" y="370" width="200" height="90">' +
+                        '<feGaussianBlur stdDeviation="0.3"/></filter>' +
+                    '<filter id="softBar" filterUnits="userSpaceOnUse" x="0" y="240" width="402" height="70">' +
+                        '<feGaussianBlur stdDeviation="0.4"/></filter>' +
+                '</defs>' +
+                '<g fill="#fff" stroke="#fff" stroke-linecap="round" filter="url(#soft)">' + pill + '</g>' +
+                '<g fill="#fff" stroke="#fff" stroke-linecap="round"' + (barSoft ? ' filter="url(#softBar)"' : '') + '>' + bar + '</g>';
+        }
+
+        // one "/" or "\" stroke
+        function line(x1, y1, x2, y2, width) {
+            return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke-width="' + width + '"/>';
+        }
+
+        // zigzag shape (same proportions in pill and bar):
+        // period = 1.604 h, each stroke leans 0.512 h, gap between strokes 0.29 h
+        function zigzagPeriod(x, cy, h, width) {
+            const top = cy - h / 2;
+            const bottom = cy + h / 2;
+            const lean = 0.512 * h;
+            const gap = 0.29 * h;
+            return line(x, bottom, x + lean, top, width) +
+                   line(x + lean + gap, top, x + 2 * lean + gap, bottom, width);
+        }
+
+        // as many whole zigzags as fit in maxWidth, centred on cx
+        function zigzagCentred(cx, cy, h, width, maxWidth) {
+            const period = 1.604 * h;
+            const oneZig = 1.314 * h;   // width of a single "/\"
+            const count = Math.max(1, Math.floor((maxWidth - oneZig) / period + 0.001) + 1);
+            const total = (count - 1) * period + oneZig;
+            let svg = "";
+            for (let i = 0; i < count; i++) {
+                svg += zigzagPeriod(cx - total / 2 + i * period, cy, h, width);
+            }
+            return svg;
+        }
+
+        // as many whole dashes as fit in maxWidth, centred on cx
+        function dashes(cx, cy, length, step, width, maxWidth) {
+            const count = Math.max(1, Math.floor((maxWidth - length) / step + 0.001) + 1);
+            const total = (count - 1) * step + length;
+            let svg = "";
+            for (let i = 0; i < count; i++) {
+                const x = cx - total / 2 + i * step;
+                svg += '<line x1="' + x + '" y1="' + cy + '" x2="' + (x + length) + '" y2="' + cy +
+                       '" stroke-width="' + width + '" stroke-linecap="butt"/>';
+            }
+            return svg;
+        }
+
+        // 2 x 2 dots: half = half the distance between dot centres
+        function fourDots(cx, cy, half, r) {
+            let svg = "";
+            const offsets = [[-half, -half], [half, -half], [-half, half], [half, half]];
+            for (let i = 0; i < offsets.length; i++) {
+                svg += '<circle cx="' + (cx + offsets[i][0]) + '" cy="' + (cy + offsets[i][1]) + '" r="' + r + '" stroke="none"/>';
+            }
+            return svg;
+        }
+
+
+        // ---------- INTERACTION 1: LONG PRESS START ----------
+        const startButton = document.querySelector("#startButton");
+
+        function startHold(event) {
+            event.preventDefault();
+            startButton.classList.add("is-holding");
+            holdTimer = setTimeout(function () {
+                startButton.classList.remove("is-holding");
+                holdTimer = null;
+                fakeDevice("power");
+            }, HOLD_TIME);
+        }
+
+        function cancelHold() {
+            startButton.classList.remove("is-holding");
+            if (holdTimer !== null) {
+                clearTimeout(holdTimer);   // released too early: nothing happens
+                holdTimer = null;
+            }
+        }
+
+        startButton.addEventListener("pointerdown", startHold);
+        startButton.addEventListener("pointerup", cancelHold);
+        startButton.addEventListener("pointerleave", cancelHold);
+        startButton.addEventListener("pointercancel", cancelHold);
+
+        startButton.addEventListener("keydown", function (event) {
+            if ((event.key === " " || event.key === "Enter") && !event.repeat) {
+                startHold(event);
+            }
+        });
+        startButton.addEventListener("keyup", cancelHold);
+
+        startButton.addEventListener("contextmenu", function (event) {
+            event.preventDefault();
+        });
+
+
+        // ---------- INTERACTION 2: SELECT STITCH PATTERN ----------
+        // Tap a column, or drag along the slider; the handle snaps to the nearest pattern.
+        const picker = document.querySelector("#patternPicker");
+        let dragging = false;
+
+        function patternAtPointer(event) {
+            const screenBox = document.querySelector(".screen").getBoundingClientRect();
+            const designX = (event.clientX - screenBox.left) / (screenBox.width / 402);
+
+            let nearest = PATTERNS[0];
+            for (let i = 0; i < PATTERNS.length; i++) {
+                if (Math.abs(PATTERNS[i].handleX - designX) < Math.abs(nearest.handleX - designX)) {
+                    nearest = PATTERNS[i];
+                }
+            }
+            return nearest.name;
+        }
+
+        picker.addEventListener("pointerdown", function (event) {
+            if (!machine.isOn) {
+                return;   // machine is off: the selector does nothing
+            }
+            dragging = true;
+            picker.setPointerCapture(event.pointerId);
+            fakeDevice("setPattern", patternAtPointer(event));
+        });
+
+        picker.addEventListener("pointermove", function (event) {
+            if (dragging) {
+                const name = patternAtPointer(event);
+                if (name !== machine.stitchPattern) {
+                    fakeDevice("setPattern", name);
+                }
+            }
+        });
+
+        picker.addEventListener("pointerup", function () { dragging = false; });
+        picker.addEventListener("pointercancel", function () { dragging = false; });
+
+        // keyboard: Tab to an option and press Enter / Space
+        const options = document.querySelectorAll(".pattern-option");
+        for (let i = 0; i < options.length; i++) {
+            options[i].addEventListener("click", function () {
+                fakeDevice("setPattern", options[i].dataset.pattern);
+            });
+        }
+
+
+
+        // ---------- INTERACTION 3: PINCH TO RESIZE THE STITCH ----------
+        // Two fingers inside the circle: spread = bigger, pinch = smaller.
+        // On a computer: trackpad pinch or mouse wheel over the stitch preview.
+        const zoomArea = document.querySelector("#zoomArea");
+        const fingers = new Map();      // pointerId -> {x, y}
+        let pinchStartDistance = 0;
+        let pinchStartSize = 1;
+
+        function fingerDistance() {
+            const p = Array.from(fingers.values());
+            return Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        }
+
+        zoomArea.addEventListener("pointerdown", function (event) {
+            zoomArea.setPointerCapture(event.pointerId);
+            fingers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            if (fingers.size === 2) {
+                pinchStartDistance = fingerDistance();
+                pinchStartSize = machine.stitchSize;
+            }
+        });
+
+        zoomArea.addEventListener("pointermove", function (event) {
+            if (!fingers.has(event.pointerId)) {
+                return;
+            }
+            fingers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            if (fingers.size === 2 && pinchStartDistance > 0) {
+                fakeDevice("setStitchSize", pinchStartSize * fingerDistance() / pinchStartDistance);
+            }
+        });
+
+        function liftFinger(event) {
+            fingers.delete(event.pointerId);
+            pinchStartDistance = 0;
+            if (fingers.size === 2) {
+                pinchStartDistance = fingerDistance();
+                pinchStartSize = machine.stitchSize;
+            }
+        }
+        zoomArea.addEventListener("pointerup", liftFinger);
+        zoomArea.addEventListener("pointercancel", liftFinger);
+
+        // trackpad pinch (arrives as wheel + ctrlKey) or normal mouse wheel
+        zoomArea.addEventListener("wheel", function (event) {
+            event.preventDefault();
+            const speed = event.ctrlKey ? 0.01 : 0.004;
+            fakeDevice("setStitchSize", machine.stitchSize * Math.exp(-event.deltaY * speed));
+        }, { passive: false });
+
+        // Safari on Mac sends its own gesture events for trackpad pinch
+        let gestureStartSize = 1;
+        zoomArea.addEventListener("gesturestart", function (event) {
+            event.preventDefault();
+            gestureStartSize = machine.stitchSize;
+        });
+        zoomArea.addEventListener("gesturechange", function (event) {
+            event.preventDefault();
+            fakeDevice("setStitchSize", gestureStartSize * event.scale);
+        });
+
+        render();
+    </script>
+</body>
+</html>
