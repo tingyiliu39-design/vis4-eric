@@ -11,7 +11,6 @@ const DOTS = [
 // further right = faster (stepless). Works before and after turning on.
 function SpeedCard({ speed, toDesignX, onChange }) {
   const dragging = useRef(false);
-  const handleCentre = SPEED_HANDLE_MIN + 5.5 + SPEED_HANDLE_TRAVEL * speed;
 
   function speedAt(event) {
     // the handle is 11 wide, so its left edge sits 5.5 left of the finger
@@ -34,12 +33,8 @@ function SpeedCard({ speed, toDesignX, onChange }) {
       <h2 className="card-label label-speed">Speed</h2>
 
       <svg className="options" viewBox="0 0 402 874" aria-hidden="true">
-        {/* dots up to the handle are drawn dark, the rest light grey */}
-        <circle className={'dot-off' + (speed === 0 ? ' is-active' : '')} cx="252.5" cy="156.5" r="4.375" />
-        {DOTS.map(([cx, r]) => (
-          <circle key={cx} cx={cx} cy="156.5" r={r}
-                  className={speed > 0 && cx <= handleCentre + 2 ? 'is-active' : undefined} />
-        ))}
+        <circle className="dot-off" cx="252.5" cy="156.5" r="4.375" />
+        {DOTS.map(([cx, r]) => <circle key={cx} cx={cx} cy="156.5" r={r} />)}
       </svg>
 
       <div className="slider slider-speed">

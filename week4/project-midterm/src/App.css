@@ -11,8 +11,8 @@
      1. the pill (one raised, lightest surface) with the stitch preview (darkest marks)
      2. START (raised button in a recessed well)
      3. battery and status
-     4. the two setting sliders (recessed, light grey labels)
-   No colour at all: everything stays in black, white and grey.
+     4. the two setting sliders (recessed grooves)
+   No colour at all: surfaces are white and grey, every text and icon is black.
    ------------------------------------------------------------ */
 
 @font-face {
@@ -27,9 +27,37 @@
     font-weight: 700;
 }
 
+/* heavier weight for START (made from the regular letters, thickened) */
+@font-face {
+    font-family: "Stitch Display";
+    src: url("./assets/fonts/stitch-display-semibold.otf") format("opentype");
+    font-weight: 600;
+}
+
+/* light weights (thinner strokes) for secondary text: labels, status, battery */
+@font-face {
+    font-family: "Stitch Display";
+    src: url("./assets/fonts/stitch-display-light.otf") format("opentype");
+    font-weight: 300;
+}
+
 @font-face {
     font-family: "Stitch Text";
     src: url("./assets/fonts/stitch-text.otf") format("opentype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Stitch Text";
+    src: url("./assets/fonts/stitch-text-light.otf") format("opentype");
+    font-weight: 300;
+}
+
+/* extra-light, for the battery readout */
+@font-face {
+    font-family: "Stitch Text";
+    src: url("./assets/fonts/stitch-text-thin.otf") format("opentype");
+    font-weight: 200;
 }
 
 :root {
@@ -40,12 +68,7 @@
     --surface-light: #f6f6f6;      /* lit side of raised parts */
     --surface-dark: #dcdcdc;       /* shaded side of raised parts */
     --groove: #e0e0e0;             /* recessed parts */
-    --dot-off: #b4b4b4;            /* options that are not selected */
-    --label: #8d8d8d;              /* small labels */
-    --text-soft: #7c7c7c;          /* battery readout */
-    --text: #4a4a4a;               /* START, status, selected options */
-    --title: #5a5a5a;              /* title: present but quieter than the pill */
-    --ink: #232323;                /* stitch preview: the darkest marks on screen */
+    --ink: #000000;                /* every text and icon: one black */
 
     /* light and shadow (light comes from the top-left) */
     --highlight: rgba(255, 255, 255, 0.9);
@@ -95,7 +118,7 @@ body {
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase;
-    color: var(--title);
+    color: var(--ink);
     white-space: nowrap;
     /* pressed into the surface */
     text-shadow: 0 calc(1 * var(--u)) 0 var(--highlight);
@@ -116,10 +139,10 @@ body {
 .card-label {
     margin: 0;
     font-size: calc(25.6 * var(--u));
-    font-weight: 400;
+    font-weight: 300;               /* secondary text: light */
     line-height: 1;
     text-transform: uppercase;
-    color: var(--label);
+    color: var(--ink);
     white-space: nowrap;
 }
 
@@ -137,28 +160,14 @@ body {
     height: calc(874 * var(--u));
     overflow: visible;
     pointer-events: none;
-    fill: var(--dot-off);
-}
-
-.options circle {
-    transition: fill 0.25s ease;
-}
-
-/* the selected pattern's dots, and the speed dots up to the handle, turn dark */
-.options .is-active {
-    fill: var(--text);
+    fill: var(--ink);
 }
 
 /* zero-speed marker: hollow ring */
 .options .dot-off {
     fill: none;
-    stroke: var(--label);
+    stroke: var(--ink);
     stroke-width: 0.8;
-}
-
-.options .dot-off.is-active {
-    fill: none;
-    stroke: var(--text);
 }
 
 /* ---------- Sliders: recessed grooves ---------- */
@@ -189,18 +198,6 @@ body {
         calc(2 * var(--u)) calc(3 * var(--u)) calc(5 * var(--u)) var(--shade-strong),
         calc(-1 * var(--u)) calc(-1 * var(--u)) calc(2 * var(--u)) var(--highlight),
         inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.8);
-}
-
-/* grip line in the middle of the handle */
-.slider-handle::after {
-    content: "";
-    position: absolute;
-    left: calc(6.6 * var(--u));
-    top: calc(11 * var(--u));
-    width: calc(1.8 * var(--u));
-    height: calc(16 * var(--u));
-    border-radius: calc(1 * var(--u));
-    background-color: #9a9a9a;
 }
 
 /* handle positions are relative to their track */
@@ -264,15 +261,16 @@ body {
 
 .start-label {
     position: relative;
-    left: calc(-0.75 * var(--u));
+    left: calc(-0.45 * var(--u));   /* -0.75, plus half the extra letter spacing */
     top: calc(-0.7 * var(--u));
     display: block;
     font-family: "Stitch Display", sans-serif;
     font-size: calc(18.33 * var(--u));
-    font-weight: 400;
+    font-weight: 600;               /* the main control: bold */
+    letter-spacing: calc(0.6 * var(--u));   /* the thicker letters keep the same gaps */
     line-height: 1;
     text-transform: uppercase;
-    color: var(--text);
+    color: var(--ink);
 }
 
 /* ---------- Device display (only visible when the machine is on) ---------- */
@@ -325,7 +323,7 @@ body {
 }
 
 .pattern-option:focus-visible {
-    outline: calc(1.5 * var(--u)) solid var(--text);
+    outline: calc(1.5 * var(--u)) solid var(--ink);
     outline-offset: calc(-3 * var(--u));
     border-radius: calc(5 * var(--u));
 }
@@ -349,7 +347,7 @@ body {
 }
 
 .start-button:focus-visible {
-    outline: calc(1.5 * var(--u)) solid var(--text);
+    outline: calc(1.5 * var(--u)) solid var(--ink);
     outline-offset: calc(2 * var(--u));
 }
 
@@ -412,7 +410,7 @@ body {
 }
 
 .ios-time {
-    fill: #111111;
+    fill: var(--ink);
     font-family: -apple-system, "SF Pro Text", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
     font-size: 17px;
     font-weight: 600;
@@ -432,7 +430,7 @@ body {
 }
 
 .speed-picker:focus-visible {
-    outline: calc(1.5 * var(--u)) solid var(--text);
+    outline: calc(1.5 * var(--u)) solid var(--ink);
     outline-offset: calc(-3 * var(--u));
     border-radius: calc(5 * var(--u));
 }
@@ -482,14 +480,15 @@ body {
     top: calc(-1.02 * var(--u));   /* centre the capitals, not the line box */
     font-family: "Stitch Text", sans-serif;
     font-size: calc(26 * var(--u));
+    font-weight: 300;               /* secondary text: light */
     line-height: 1;
     text-transform: uppercase;
     text-align: center;
     white-space: nowrap;
-    color: var(--text);
+    color: var(--ink);
 }
 
-/* two-line warning uses smaller, darker text */
+/* two-line warning uses smaller text */
 .two-line-warning .status-text {
     top: calc(0.4 * var(--u));
     font-size: calc(12.66 * var(--u));
@@ -513,13 +512,14 @@ body {
     width: calc(175 * var(--u));
     height: calc(515.5 * var(--u));
     overflow: visible;
-    color: var(--text-soft);       /* the icon and % sign use currentColor */
+    color: var(--ink);             /* the icon and % sign use currentColor */
 }
 
 .battery-digits {
     font-family: "Stitch Text", sans-serif;
+    font-weight: 200;               /* secondary information: extra-light */
     font-size: 83.2px;          /* in pill units: the 0 is 37.5 tall like the design */
-    fill: var(--text-soft);
+    fill: var(--ink);
 }
 
 /* ---------- Pattern locked while sewing: short "no" shake ---------- */

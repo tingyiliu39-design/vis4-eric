@@ -36,10 +36,8 @@ function PatternCard({ pattern, lockedCount, toDesignX, onSelect }) {
 
       {/* SVG circles keep every dot the same size at any screen scale */}
       <svg className="options" viewBox="0 0 402 874" aria-hidden="true">
-        {/* the selected pattern's icon is drawn dark, the others light grey */}
         {PATTERNS.map((p) => DOTS[p.name].map(([cx, cy]) => (
-          <circle key={cx + '-' + cy} cx={cx} cy={cy} r="2.5"
-                  className={pattern === p.name ? 'is-active' : undefined} />
+          <circle key={cx + '-' + cy} cx={cx} cy={cy} r="2.5" />
         )))}
       </svg>
 
