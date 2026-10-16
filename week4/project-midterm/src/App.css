@@ -8,12 +8,11 @@
    Visual style: soft, low-saturation black / white / grey, like the
    device itself. Depth comes from light (top-left) and shadow
    (bottom-right) instead of colour. Hierarchy, strongest first:
-     1. the pill (raised, lightest surface) with the stitch preview (darkest marks)
+     1. the pill (one raised, lightest surface) with the stitch preview (darkest marks)
      2. START (raised button in a recessed well)
      3. battery and status
      4. the two setting sliders (recessed, light grey labels)
-   The only colour is a small yellow "power on" light around START,
-   like the indicator light on the real machine.
+   No colour at all: everything stays in black, white and grey.
    ------------------------------------------------------------ */
 
 @font-face {
@@ -52,9 +51,6 @@
     --highlight: rgba(255, 255, 255, 0.9);
     --shade: rgba(0, 0, 0, 0.13);
     --shade-strong: rgba(0, 0, 0, 0.2);
-
-    /* power light — the only colour, used only while the machine is on */
-    --power: #f3d83c;
 }
 
 * {
@@ -231,21 +227,6 @@ body {
         inset calc(-1 * var(--u)) calc(-1 * var(--u)) calc(2 * var(--u)) rgba(0, 0, 0, 0.06);
 }
 
-/* display window: the recessed area that holds the stitches, status and battery */
-.pill::before {
-    content: "";
-    position: absolute;
-    left: calc(13 * var(--u));
-    top: calc(13 * var(--u));
-    width: calc(149 * var(--u));
-    height: calc(355 * var(--u));
-    border-radius: calc(74.5 * var(--u)) calc(74.5 * var(--u)) calc(40 * var(--u)) calc(40 * var(--u));
-    background: linear-gradient(180deg, #e3e3e3, #ececec);
-    box-shadow:
-        inset calc(3 * var(--u)) calc(4 * var(--u)) calc(8 * var(--u)) rgba(0, 0, 0, 0.1),
-        inset calc(-3 * var(--u)) calc(-3 * var(--u)) calc(6 * var(--u)) rgba(255, 255, 255, 0.85);
-}
-
 /* START: a recessed well with a raised round button in it */
 .start-button {
     position: absolute;
@@ -279,36 +260,6 @@ body {
         calc(-2 * var(--u)) calc(-2 * var(--u)) calc(4 * var(--u)) var(--highlight),
         inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.9);
     transition: box-shadow 0.15s ease;
-}
-
-/* power light: a thin ring between the well and the face, only while the machine is on */
-.start-button::after {
-    content: "";
-    position: absolute;
-    left: calc(4 * var(--u));
-    top: calc(4 * var(--u));
-    width: calc(67 * var(--u));
-    height: calc(67 * var(--u));
-    border-radius: 50%;
-    border: calc(1.4 * var(--u)) solid var(--power);
-    box-shadow: 0 0 calc(5 * var(--u)) rgba(243, 216, 60, 0.55);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.screen.is-on .start-button::after {
-    opacity: 1;
-}
-
-/* while sewing the light breathes slowly */
-@keyframes breathe {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.35; }
-}
-
-.screen.is-running .start-button::after {
-    animation: breathe 1.6s ease-in-out infinite;
 }
 
 .start-label {
@@ -503,8 +454,7 @@ body {
 /* respect the system setting for less motion */
 @media (prefers-reduced-motion: reduce) {
     .screen.is-running .pill,
-    .screen.is-running .stitch-canvas,
-    .screen.is-running .start-button::after {
+    .screen.is-running .stitch-canvas {
         animation: none;
     }
 }
