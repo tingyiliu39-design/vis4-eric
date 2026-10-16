@@ -22,7 +22,7 @@
     --u: min(calc(100vw / 402), calc(100vh / 874));
 
     --background: #101010;
-    --card: #888888;
+    --card: #cecece;
     --track: #5d5d5d;
     --pill: #cecece;
     --yellow: #faeb28;
@@ -66,8 +66,8 @@ body {
 
 /* ---------- Title ---------- */
 .title {
-    left: calc(5 * var(--u));
-    top: calc(17.4 * var(--u));
+    left: calc(26 * var(--u));
+    top: calc(59.4 * var(--u));   /* moved down 19px: more room under the status bar */
     margin: 0;
     font-size: calc(32 * var(--u));
     font-weight: 700;
@@ -85,23 +85,24 @@ body {
 
 .card-pattern {
     left: calc(5 * var(--u));
-    top: calc(77 * var(--u));
+    top: calc(96 * var(--u));      /* was 77; card is 19px shorter, bottom stays at 243 */
     width: calc(194 * var(--u));
-    height: calc(166 * var(--u));
+    height: calc(147 * var(--u));
 }
 
 .card-speed {
     left: calc(204 * var(--u));
-    top: calc(76 * var(--u));
+    top: calc(95 * var(--u));      /* was 76; card is 19px shorter, bottom stays at 243 */
     width: calc(193 * var(--u));
-    height: calc(167 * var(--u));
+    height: calc(148 * var(--u));
 }
 
 .card-main {
     left: calc(5 * var(--u));
-    top: calc(311 * var(--u));
+    top: calc(248 * var(--u));
     width: calc(392 * var(--u));
-    height: calc(558 * var(--u));
+    height: calc(621 * var(--u));
+    background-color: var(--track);
 }
 
 /* Inside a card, positions are relative to that card's top-left corner
@@ -122,44 +123,44 @@ body {
 .label-speed   { left: calc((212 - 204) * var(--u)); top: calc((74.52 - 76) * var(--u)); }
 
 /* ---------- Option dots ---------- */
-/* the dot container sits at the screen origin, so dots use screen coordinates */
-.card-pattern .options { left: calc(-5 * var(--u));   top: calc(-77 * var(--u)); }
-.card-speed .options   { left: calc(-204 * var(--u)); top: calc(-76 * var(--u)); }
-
-/* each dot gets its centre (--x, --y) and radius (--r) from the HTML */
-.dot {
-    position: absolute;
-    left: calc((var(--x) - var(--r)) * var(--u));
-    top: calc((var(--y) - var(--r)) * var(--u));
-    width: calc(var(--r) * 2 * var(--u));
-    height: calc(var(--r) * 2 * var(--u));
-    border-radius: 50%;
-    background-color: var(--white);
+/* Each dot row is an SVG the size of the whole screen, shifted back by the
+   card's offset, so the circles use screen coordinates (cx, cy, r in the HTML).
+   SVG keeps every dot the same size and centred on the same line when scaled. */
+.options {
+    width: calc(402 * var(--u));
+    height: calc(874 * var(--u));
+    overflow: visible;
+    pointer-events: none;
+    fill: var(--black);
 }
 
+/* dots keep their design coordinates, drawn 4px lower than the original design */
+.card-pattern .options { left: calc(-5 * var(--u));   top: calc((4 - 96) * var(--u)); }
+.card-speed .options   { left: calc(-204 * var(--u)); top: calc((4 - 95) * var(--u)); }
+
 /* zero-speed marker: hollow ring */
-.dot-off {
-    background-color: transparent;
-    border: calc(0.67 * var(--u)) solid var(--white);
+.options .dot-off {
+    fill: none;
+    stroke: var(--black);
+    stroke-width: 0.67;
 }
 
 /* ---------- Sliders ---------- */
 .slider {
     width: calc(140 * var(--u));
     height: calc(49 * var(--u));
-    border-radius: calc(24.5 * var(--u));
-    background-color: var(--track);
-    box-shadow: inset 0 calc(3 * var(--u)) calc(4 * var(--u)) rgba(0, 0, 0, 0.3);
+    /* textured track with its inner shadow, taken from the design */
+    background: url("images/track.png") center / 100% 100% no-repeat;
 }
 
 .slider-pattern {
     left: calc((31 - 5) * var(--u));
-    top: calc((172.84 - 77) * var(--u));
+    top: calc((172.84 + 4 - 96) * var(--u));   /* 4px lower than the original design */
 }
 
 .slider-speed {
     left: calc((230 - 204) * var(--u));
-    top: calc((172.71 - 76) * var(--u));
+    top: calc((173 + 4 - 95) * var(--u));
 }
 
 .slider-handle {
@@ -176,22 +177,18 @@ body {
 }
 
 /* handle positions are relative to their track */
-.handle-speed   { left: calc((294 - 230) * var(--u)); }
-
-/* ---------- Status bar ---------- */
-.status-bar {
-    left: calc(5 * var(--u));
-    top: calc(248 * var(--u));
-    width: calc(392 * var(--u));
-    height: calc(58 * var(--u));
-    border-radius: calc(5 * var(--u));
-    background-color: var(--track);
-}
+/* speed handle: x 248 (stopped) to x 341 (fastest); --speed (0..1) is set by render() */
+.handle-speed   { left: calc((248 - 230 + 93 * var(--speed, 0)) * var(--u)); }
 
 /* ---------- Pill + start button ---------- */
+/* The pill keeps its original 175 x 515.5 drawing (and everything inside it)
+   and is scaled up 1.10632x to the new design size, from its top-left corner
+   at (106.23, 273.07). Positions inside the pill use the original numbers. */
 .pill {
-    left: calc((119.5 - 5) * var(--u));
-    top: calc((331.5 - 311) * var(--u));
+    left: calc((106.23 - 5) * var(--u));
+    top: calc((273.07 - 248) * var(--u));
+    transform: scale(1.10632);
+    transform-origin: 0 0;
     width: calc(175 * var(--u));
     height: calc(515.5 * var(--u));
     border-radius: calc(87.5 * var(--u));
@@ -203,9 +200,9 @@ body {
 
 .start-button {
     position: absolute;
-    /* ring centre (207.25, 759.5), diameter 75 — relative to the pill */
-    left: calc((207.25 - 37.5 - 119.5) * var(--u));
-    top: calc((759.5 - 37.5 - 331.5) * var(--u));
+    /* ring centre (207.7, 759.05), diameter 75 — relative to the pill */
+    left: calc((207.7 - 37.5 - 119.5) * var(--u));
+    top: calc((759.05 - 37.5 - 331.5) * var(--u));
     width: calc(75 * var(--u));
     height: calc(75 * var(--u));
     padding: 0;
@@ -233,7 +230,7 @@ body {
 .start-label {
     position: relative;
     left: calc(-0.75 * var(--u));
-    top: calc(-0.25 * var(--u));
+    top: calc(-0.7 * var(--u));
     display: block;
     font-family: "Stitch Display", sans-serif;
     font-size: calc(18.33 * var(--u));
@@ -252,48 +249,20 @@ body {
     pointer-events: none;
 }
 
-/* battery shows whenever the machine is on */
-.screen.is-on .display-battery {
-    opacity: 1;
-}
-
-/* status badge: only the one for the selected pattern */
-.screen.is-on[data-pattern="straight"] .for-straight,
-.screen.is-on[data-pattern="zigzag"] .for-zigzag,
-.screen.is-on[data-pattern="button"] .for-button {
+/* status badge and battery readout show whenever the machine is on */
+.screen.is-on .status-badge,
+.screen.is-on .battery-readout {
     opacity: 1;
 }
 
 
 
 
-.status-stitching {
-    left: calc((138.98 - 119.5) * var(--u));
-    top: calc((487.55 - 331.5) * var(--u));
-    width: calc(135.56 * var(--u));
-    height: calc(33.05 * var(--u));
-}
 
-.status-hemming {
-    left: calc((137.86 - 119.5) * var(--u));
-    top: calc((486.43 - 331.5) * var(--u));
-    width: calc(137.81 * var(--u));
-    height: calc(35.29 * var(--u));
-}
 
-.status-button {
-    left: calc((137.86 - 119.5) * var(--u));
-    top: calc((486.43 - 331.5) * var(--u));
-    width: calc(138.93 * var(--u));
-    height: calc(35.29 * var(--u));
-}
 
-.display-battery {
-    left: calc((155.79 - 119.5) * var(--u));
-    top: calc((627.03 - 331.5) * var(--u));
-    width: calc(105.87 * var(--u));
-    height: calc(44.25 * var(--u));
-}
+
+
 
 /* ---------- Stitch pattern selector ---------- */
 /* handle moves to the selected pattern (left = handle x minus track x 31) */
@@ -309,7 +278,7 @@ body {
    (card-relative: covers screen x 5–199, y 120–230) */
 .pattern-picker {
     left: 0;
-    top: calc((120 - 77) * var(--u));
+    top: calc((120 + 4 - 96) * var(--u));
     width: calc(194 * var(--u));
     height: calc(110 * var(--u));
     display: flex;
@@ -323,10 +292,6 @@ body {
     background: transparent;
     -webkit-tap-highlight-color: transparent;
     cursor: pointer;
-}
-
-.pattern-option:disabled {
-    cursor: default;
 }
 
 .pattern-option:focus {
@@ -370,7 +335,7 @@ body {
 }
 
 
-/* ---------- Stitch drawing (pill preview + status bar) ---------- */
+/* ---------- Stitch drawing (pill preview) ---------- */
 /* one SVG over the whole screen, drawn in design coordinates (viewBox 0 0 402 874) */
 .stitch-canvas {
     left: 0;
@@ -387,12 +352,12 @@ body {
 }
 
 /* ---------- Pinch-to-resize area (the red circle in the reference) ---------- */
-/* circle centre (206, 421), radius 73 */
+/* circle centre (201.93, 372.1), radius 80.8 */
 .zoom-area {
-    left: calc((206 - 73) * var(--u));
-    top: calc((421 - 73) * var(--u));
-    width: calc(146 * var(--u));
-    height: calc(146 * var(--u));
+    left: calc((201.93 - 80.8) * var(--u));
+    top: calc((372.1 - 80.8) * var(--u));
+    width: calc(161.6 * var(--u));
+    height: calc(161.6 * var(--u));
     border-radius: 50%;
     touch-action: none;
     -webkit-user-select: none;
@@ -403,4 +368,157 @@ body {
 /* only catches gestures while the machine is on */
 .screen.is-on .zoom-area {
     pointer-events: auto;
+}
+
+/* ---------- iPhone status bar (mock-up) ---------- */
+/* 402 x 62 strip at the top of the screen, drawn in design pixels */
+.ios-status-bar {
+    left: 0;
+    top: 0;
+    width: calc(402 * var(--u));
+    height: calc(62 * var(--u));
+    pointer-events: none;
+}
+
+/* a real phone shows its own status bar (class set by the check in index.html <head>) */
+.real-phone .ios-status-bar {
+    display: none;
+}
+
+.ios-time {
+    fill: var(--white);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+
+/* ---------- Speed selector ---------- */
+/* invisible drag area over the speed dots + slider
+   (card-relative: covers screen x 204–397, y 145–232) */
+.speed-picker {
+    left: 0;
+    top: calc((145 - 95) * var(--u));
+    width: calc(193 * var(--u));
+    height: calc(87 * var(--u));
+    touch-action: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.speed-picker:focus-visible {
+    outline: calc(1.5 * var(--u)) solid var(--yellow);
+    outline-offset: calc(-3 * var(--u));
+    border-radius: calc(5 * var(--u));
+}
+
+/* ---------- Running: the device shakes slightly left and right ---------- */
+/* --shake-time is set by render(): 0.12s when slow, 0.05s at full speed.
+   Uses the separate `translate` property so the pill's scale() is kept. */
+@keyframes shake {
+    0%, 100% { translate: 0 0; }
+    25%      { translate: calc(-0.8 * var(--u)) 0; }
+    75%      { translate: calc(0.8 * var(--u)) 0; }
+}
+
+.screen.is-running .pill,
+.screen.is-running .stitch-canvas {
+    animation: shake var(--shake-time, 0.12s) linear infinite;
+}
+
+/* respect the system setting for less motion */
+@media (prefers-reduced-motion: reduce) {
+    .screen.is-running .pill,
+    .screen.is-running .stitch-canvas {
+        animation: none;
+    }
+}
+
+/* ---------- Status badge (real text) ---------- */
+/* white rounded badge from the design: screen 142.34–270.62 x 491.47–516.68,
+   i.e. pill coordinates (22.84, 159.97), 128.28 x 25.21 */
+@font-face {
+    font-family: "Stitch Text";
+    src: url("fonts/stitch-text.otf") format("opentype");
+}
+
+.status-badge {
+    left: calc(22.84 * var(--u));
+    top: calc(159.97 * var(--u));
+    width: calc(128.28 * var(--u));
+    height: calc(25.21 * var(--u));
+    border-radius: calc(12.6 * var(--u));
+    background-color: var(--white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-text {
+    position: relative;
+    left: calc(-0.68 * var(--u));
+    top: calc(-1.02 * var(--u));   /* centre the capitals, not the line box */
+    font-family: "Stitch Text", sans-serif;
+    font-size: calc(26 * var(--u));
+    line-height: 1;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+    color: #c8c8c8;
+}
+
+/* two-line warning uses smaller text */
+.two-line-warning .status-text {
+    top: calc(0.4 * var(--u));
+    font-size: calc(12.66 * var(--u));
+    line-height: 0.79;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.15; }
+}
+
+.screen.is-on.show-warning .status-badge {
+    animation: blink 0.9s ease-in-out infinite;
+}
+
+/* ---------- Battery readout (real text + drawn icon) ---------- */
+.battery-readout {
+    left: 0;
+    top: 0;
+    width: calc(175 * var(--u));
+    height: calc(515.5 * var(--u));
+    overflow: visible;
+}
+
+.battery-digits {
+    font-family: "Stitch Text", sans-serif;
+    font-size: 83.2px;          /* in pill units: the 0 is 37.5 tall like the design */
+    fill: var(--white);
+}
+
+/* ---------- Pattern locked while sewing: short "no" shake ---------- */
+@keyframes locked-shake {
+    0%, 100% { translate: 0 0; }
+    15%      { translate: calc(-3 * var(--u)) 0; }
+    35%      { translate: calc(3 * var(--u)) 0; }
+    55%      { translate: calc(-2 * var(--u)) 0; }
+    75%      { translate: calc(1.5 * var(--u)) 0; }
+}
+
+.slider-pattern.is-locked {
+    animation: locked-shake 0.4s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .slider-pattern.is-locked {
+        animation: locked-blink 0.4s ease-out;
+    }
+
+    @keyframes locked-blink {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0.5; }
+    }
 }

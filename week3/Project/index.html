@@ -5,10 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Handheld Sewing Machine</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- Real phone check: a real phone already shows its own status bar, so the mock-up
+         one is hidden there. Browser developer tools only pretend to be a phone, so the
+         mock-up stays visible when testing on a computer.
+         - iPhone/iPad (Safari, or any browser on iOS): only real iOS has navigator.standalone
+         - Android: a real Android phone reports itself as Android and has a touch screen
+         Add ?statusbar=show or ?statusbar=hide to the address to force it either way. -->
+    <script>
+        (function () {
+            const forced = new URLSearchParams(location.search).get("statusbar");
+            const realIOS = "standalone" in navigator && /iPhone|iPad|iPod/.test(navigator.userAgent);
+            const realAndroid = /Android/.test(navigator.userAgent) && navigator.maxTouchPoints > 0
+                                && !navigator.webdriver && window.outerWidth === window.innerWidth;
+            if (forced === "hide" || (forced !== "show" && (realIOS || realAndroid))) {
+                document.documentElement.classList.add("real-phone");
+            }
+        })();
+    </script>
 </head>
 <body>
 
     <main class="screen" data-pattern="straight">
+
+        <!-- iPhone 17 status bar mock-up: time, front camera (Dynamic Island), signal, Wi-Fi, battery.
+             Drawn in design pixels (402 x 62). Hidden on a real phone (see the check in <head>). -->
+        <svg class="ios-status-bar" viewBox="0 0 402 62" aria-hidden="true">
+            <!-- time -->
+            <text class="ios-time" x="76" y="35.5" text-anchor="middle">9:41</text>
+
+            <!-- Dynamic Island with the front camera -->
+            <rect x="138.5" y="11" width="125" height="37" rx="18.5" fill="#000" />
+            <circle cx="244.5" cy="29.5" r="5.5" fill="#0b0b12" />
+            <circle cx="244.5" cy="29.5" r="2.6" fill="#141a2a" />
+            <circle cx="243.4" cy="28.4" r="0.8" fill="#2c3550" />
+
+            <!-- cellular signal: 4 bars -->
+            <g fill="#fff">
+                <rect x="290"   y="31"   width="3" height="4"   rx="0.8" />
+                <rect x="294.5" y="29"   width="3" height="6"   rx="0.8" />
+                <rect x="299"   y="26.5" width="3" height="8.5" rx="0.8" />
+                <rect x="303.5" y="24"   width="3" height="11"  rx="0.8" />
+            </g>
+
+            <!-- Wi-Fi: dot + two arcs -->
+            <g fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+                <path d="M 311.6 28.3 A 9 9 0 0 1 324.4 28.3" />
+                <path d="M 314.3 31 A 5.2 5.2 0 0 1 321.7 31" />
+            </g>
+            <circle cx="318" cy="34" r="1.6" fill="#fff" />
+
+            <!-- battery: outline, charge level, cap -->
+            <rect x="331.5" y="23.5" width="24" height="12" rx="3.6" fill="none" stroke="#fff" stroke-opacity="0.4" />
+            <rect x="333.5" y="25.5" width="20" height="8" rx="2" fill="#fff" />
+            <path d="M 357 27.5 a 1.6 2 0 0 1 0 4 z" fill="#fff" fill-opacity="0.4" />
+        </svg>
 
         <!-- Title -->
         <h1 class="title">Handheld Sewing Machine</h1>
@@ -17,21 +68,23 @@
         <section class="card card-pattern">
             <h2 class="card-label label-pattern">Stitch Pattern</h2>
 
-            <div class="options">
+            <!-- dots drawn as SVG circles in screen coordinates, so every dot is rendered
+                 at exactly the same size and on the same line at any screen scale -->
+            <svg class="options" viewBox="0 0 402 874" aria-hidden="true">
                 <!-- pattern 1: straight -->
-                <span class="dot" style="--x:54.5;  --y:136.5; --r:2.5"></span>
-                <span class="dot" style="--x:54.5;  --y:157.5; --r:2.5"></span>
+                <circle cx="54.5" cy="136.5" r="2.5" />
+                <circle cx="54.5" cy="157.5" r="2.5" />
                 <!-- pattern 2: zigzag -->
-                <span class="dot" style="--x:93.5;  --y:136.5; --r:2.5"></span>
-                <span class="dot" style="--x:93.5;  --y:150.5; --r:2.5"></span>
-                <span class="dot" style="--x:108.5; --y:143.5; --r:2.5"></span>
-                <span class="dot" style="--x:108.5; --y:157.5; --r:2.5"></span>
+                <circle cx="93.5" cy="136.5" r="2.5" />
+                <circle cx="93.5" cy="150.5" r="2.5" />
+                <circle cx="108.5" cy="143.5" r="2.5" />
+                <circle cx="108.5" cy="157.5" r="2.5" />
                 <!-- pattern 3: button (cross) -->
-                <span class="dot" style="--x:142.5; --y:140.5; --r:2.5"></span>
-                <span class="dot" style="--x:157.5; --y:140.5; --r:2.5"></span>
-                <span class="dot" style="--x:142.5; --y:154.5; --r:2.5"></span>
-                <span class="dot" style="--x:157.5; --y:154.5; --r:2.5"></span>
-            </div>
+                <circle cx="142.5" cy="140.5" r="2.5" />
+                <circle cx="157.5" cy="140.5" r="2.5" />
+                <circle cx="142.5" cy="154.5" r="2.5" />
+                <circle cx="157.5" cy="154.5" r="2.5" />
+            </svg>
 
             <div class="slider slider-pattern">
                 <div class="slider-handle handle-pattern"></div>
@@ -49,37 +102,59 @@
         <section class="card card-speed">
             <h2 class="card-label label-speed">Speed</h2>
 
-            <div class="options">
-                <span class="dot dot-off" style="--x:250.71; --y:160.71; --r:4.71"></span>
-                <span class="dot" style="--x:262.5; --y:160.71; --r:0.5"></span>
-                <span class="dot" style="--x:269;   --y:160.71; --r:1"></span>
-                <span class="dot" style="--x:276;   --y:160.71; --r:1"></span>
-                <span class="dot" style="--x:283.5; --y:160.71; --r:1.5"></span>
-                <span class="dot" style="--x:292;   --y:160.71; --r:2"></span>
-                <span class="dot" style="--x:301;   --y:160.71; --r:2"></span>
-                <span class="dot" style="--x:311.5; --y:160.71; --r:2.5"></span>
-                <span class="dot" style="--x:322;   --y:160.71; --r:3"></span>
-                <span class="dot" style="--x:335;   --y:160.71; --r:4"></span>
-                <span class="dot" style="--x:350.5; --y:160.71; --r:4.5"></span>
-            </div>
+            <!-- dots drawn as SVG circles in screen coordinates, so every dot is rendered
+                 at exactly the same size and on the same line at any screen scale -->
+            <svg class="options" viewBox="0 0 402 874" aria-hidden="true">
+                <circle class="dot-off" cx="252.71" cy="160.71" r="4.375" />
+                <circle cx="262.5" cy="160.71" r="0.5" />
+                <circle cx="269" cy="160.71" r="1" />
+                <circle cx="276" cy="160.71" r="1" />
+                <circle cx="283.5" cy="160.71" r="1.5" />
+                <circle cx="292" cy="160.71" r="2" />
+                <circle cx="301" cy="160.71" r="2" />
+                <circle cx="311.5" cy="160.71" r="2.5" />
+                <circle cx="322" cy="160.71" r="3" />
+                <circle cx="334" cy="160.71" r="4" />
+                <circle cx="348.5" cy="160.71" r="4.5" />
+            </svg>
 
             <div class="slider slider-speed">
                 <div class="slider-handle handle-speed"></div>
             </div>
-        </section>
 
-        <!-- Status bar: the selected stitch is drawn here large (see stitch canvas below) -->
-        <section class="status-bar" id="status"></section>
+            <!-- invisible drag area over the speed dots + slider (stepless speed) -->
+            <div class="speed-picker" id="speedPicker" role="slider" tabindex="0"
+                 aria-label="Speed" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+        </section>
 
         <!-- Main card with the device display and start button -->
         <section class="card card-main">
             <div class="pill">
                 <!-- device display: only visible when the machine is on -->
-                <img class="display status-stitching for-straight" src="images/status-stitching.png" alt="Stitching">
-                <img class="display status-hemming for-zigzag" src="images/status-hemming.png" alt="Hemming">
-                <img class="display status-button for-button" src="images/status-button.png" alt="Button">
 
-                <img class="display display-battery" src="images/battery-05.png" alt="Battery 05%">
+                <!-- status badge: stitch name, or a blinking warning -->
+                <div class="display status-badge" id="statusBadge" aria-live="polite">
+                    <span class="status-text" id="statusText">Stitching</span>
+                </div>
+
+                <!-- battery readout: two digits, battery icon (fills with the level) and % sign.
+                     Drawn in the pill's own coordinates (175 x 515.5). -->
+                <svg class="display battery-readout" viewBox="0 0 175 515.5" aria-hidden="true">
+                    <text class="battery-digits" id="batteryDigits" x="37.24" y="336.42">05</text>
+
+                    <!-- battery icon: outline + cap + charge level -->
+                    <rect x="125.35" y="300.56" width="11" height="8.4" rx="1.6"
+                          fill="none" stroke="#fff" stroke-width="1.1" />
+                    <rect x="137.1" y="302.8" width="1.7" height="3.9" rx="0.6" fill="#fff" />
+                    <rect id="batteryLevel" x="126.9" y="302.1" width="0.4" height="5.3" rx="0.6" fill="#fff" />
+
+                    <!-- % sign -->
+                    <g fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round">
+                        <circle cx="125.36" cy="325.22" r="2.8" />
+                        <circle cx="135.72" cy="332.78" r="3.1" />
+                        <line x1="123.7" y1="334.7" x2="137.1" y2="323" />
+                    </g>
+                </svg>
 
                 <button class="start-button" id="startButton" type="button" aria-label="Hold to turn on">
                     <span class="start-label">Start</span>
@@ -87,7 +162,7 @@
             </div>
         </section>
 
-        <!-- Stitch drawing: preview in the pill + large version in the status bar.
+        <!-- Stitch drawing: preview in the pill.
              Drawn by drawStitches() in design coordinates, so it can be resized. -->
         <svg class="stitch-canvas" id="stitchCanvas" viewBox="0 0 402 874" aria-hidden="true"></svg>
 
@@ -104,8 +179,22 @@
             stitchPattern: "straight",
             status: "stitching",
             stitchSize: 1,     // 1 = size in the design; pinch changes it
-            battery: 5
+            mode: "idle",      // "idle" (on, not started yet) / "running" / "paused" — short press START
+            warning: null,     // "selectSpeed" when START is pressed with speed at zero
+            speed: 0,          // 0 = stopped (hollow circle) ... 1 = fastest, stepless
+            stitchesSewn: 0,   // counted up by the fake device while sewing
+            battery: 5,        // %; drops 1% for every 10 s of sewing
+            sewingSeconds: 0   // sewing time since the last 1% drop
         };
+
+        const BATTERY_FULL = 5;           // the level a fresh start begins with (as in the design)
+        const SECONDS_PER_PERCENT = 10;
+
+        // speed slider: handle travels from x 248 (stopped) to x 341 (full speed)
+        const SPEED_HANDLE_MIN = 248;
+        const SPEED_HANDLE_TRAVEL = 93;
+        const SLOWEST = 1.5;    // stitches per second just above zero
+        const FASTEST = 12;     // stitches per second at full speed
 
         const MIN_SIZE = 0.6;
         const MAX_SIZE = 1.8;
@@ -118,7 +207,7 @@
             { name: "button",   status: "button",    handleX: 150.5 }
         ];
 
-        const HOLD_TIME = 1000;   // ms the START button must be held
+        const HOLD_TIME = 1000;   // ms START must be held to turn on / off (shorter = start / pause)
         let holdTimer = null;
 
 
@@ -128,6 +217,31 @@
         function fakeDevice(command, value) {
             if (command === "power") {
                 machine.isOn = !machine.isOn;
+                // on or off, the machine is not sewing; the slider settings are kept
+                machine.mode = "idle";
+                machine.stitchesSewn = 0;
+                machine.warning = null;
+                if (machine.isOn) {
+                    // a fresh start: the (fake) battery is back to its starting level
+                    machine.battery = BATTERY_FULL;
+                    machine.sewingSeconds = 0;
+                }
+            }
+
+            if (command === "startPause") {
+                // only an "on" machine can start sewing
+                if (machine.isOn) {
+                    if (machine.mode === "running") {
+                        machine.mode = "paused";
+                    } else if (machine.battery <= 0) {
+                        machine.warning = "batteryEmpty";     // can't start: battery flat
+                    } else if (machine.speed === 0) {
+                        machine.warning = "selectSpeed";      // can't start: no speed set
+                    } else {
+                        machine.mode = "running";             // start / resume sewing
+                        machine.warning = null;
+                    }
+                }
             }
 
             if (command === "setStitchSize") {
@@ -137,10 +251,29 @@
                 }
             }
 
+            if (command === "setSpeed") {
+                // the speed can be set before or after turning the machine on
+                machine.speed = Math.min(1, Math.max(0, value));
+                if (machine.speed > 0 && machine.warning === "selectSpeed") {
+                    machine.warning = null;      // speed chosen: warning goes away, press START to go
+                }
+                if (machine.speed === 0 && machine.mode === "running") {
+                    machine.mode = "paused";     // back on the hollow circle = stop
+                } else if (machine.mode === "paused") {
+                    machine.mode = "idle";       // changing speed after a pause = back to the speed preview
+                }
+            }
+
             if (command === "setPattern") {
-                // the machine only accepts a new pattern while it is on
-                if (machine.isOn) {
+                // the pattern can be chosen before or after turning the machine on,
+                // but not while it is sewing (pause first)
+                if (machine.mode === "running") {
+                    if (value !== machine.stitchPattern) {
+                        showPatternLocked();    // refused: the slider shakes "no"
+                    }
+                } else if (value !== machine.stitchPattern) {
                     machine.stitchPattern = value;
+                    machine.stitchesSewn = 0;   // new pattern: start the row again
                 }
             }
 
@@ -155,6 +288,55 @@
         }
 
 
+        // The fake device moves the stitches:
+        //  - running: really sewing (the device shakes and uses battery)
+        //  - on but not started yet, speed above zero: a preview of that speed (no shake, no battery)
+        //  - paused or stopped: no movement, the whole pattern is shown
+        let lastFrame = null;
+        let shownStitches = -1;
+
+        function isSewing() {
+            return machine.isOn && machine.mode === "running" && machine.speed > 0;
+        }
+
+        function isPreviewing() {
+            return machine.isOn && machine.mode === "idle" && machine.speed > 0;
+        }
+
+        function fakeDeviceRun(now) {
+            if (lastFrame !== null && (isSewing() || isPreviewing())) {
+                const seconds = (now - lastFrame) / 1000;
+                const stitchesPerSecond = SLOWEST + (FASTEST - SLOWEST) * machine.speed;
+                machine.stitchesSewn += stitchesPerSecond * seconds;
+
+                // only redraw when a new stitch appears
+                if (Math.floor(machine.stitchesSewn) !== shownStitches) {
+                    shownStitches = Math.floor(machine.stitchesSewn);
+                    drawStitches();
+                }
+            }
+
+            if (lastFrame !== null && isSewing()) {
+                const seconds = (now - lastFrame) / 1000;
+
+                // battery: 1% less for every 10 seconds of sewing
+                machine.sewingSeconds += seconds;
+                if (machine.sewingSeconds >= SECONDS_PER_PERCENT) {
+                    machine.sewingSeconds -= SECONDS_PER_PERCENT;
+                    machine.battery = Math.max(0, machine.battery - 1);
+                    if (machine.battery === 0) {
+                        machine.mode = "paused";          // flat battery stops the machine
+                        machine.warning = "batteryEmpty";
+                    }
+                    render();
+                }
+            }
+            lastFrame = now;
+            requestAnimationFrame(fakeDeviceRun);
+        }
+        requestAnimationFrame(fakeDeviceRun);
+
+
         // ---------- RENDER ----------
         // One function redraws the page from the state.
         function render() {
@@ -163,7 +345,8 @@
 
             if (machine.isOn) {
                 screen.classList.add("is-on");
-                startButton.setAttribute("aria-label", "Hold to turn off");
+                startButton.setAttribute("aria-label",
+                    machine.mode === "running" ? "Tap to pause, hold to turn off" : "Tap to start, hold to turn off");
             } else {
                 screen.classList.remove("is-on");
                 startButton.setAttribute("aria-label", "Hold to turn on");
@@ -172,12 +355,54 @@
             // CSS uses this to move the handle and pick which pictures to show
             screen.dataset.pattern = machine.stitchPattern;
 
+            // the device vibrates only while it is actually sewing; faster speed = faster shake
+            if (isSewing()) {
+                screen.classList.add("is-running");
+            } else {
+                screen.classList.remove("is-running");
+            }
+            // status badge: stitch name, or a blinking warning
+            const statusText = document.querySelector("#statusText");
+            if (machine.warning === "selectSpeed") {
+                statusText.innerHTML = "Please select<br>a stitch speed";
+            } else if (machine.warning === "batteryEmpty") {
+                statusText.innerHTML = "Battery empty<br>restart to recharge";
+            } else {
+                statusText.innerHTML = machine.status;
+            }
+            if (machine.isOn && machine.warning !== null) {
+                screen.classList.add("show-warning");
+            } else {
+                screen.classList.remove("show-warning");
+            }
+            if (machine.warning !== null) {
+                screen.classList.add("two-line-warning");
+            } else {
+                screen.classList.remove("two-line-warning");
+            }
+
+            // battery readout: two digits + icon filled to the level
+            document.querySelector("#batteryDigits").textContent = String(machine.battery).padStart(2, "0");
+            // The icon is drawn 4x exaggerated (20% = full bar) so each 1% step is visible
+            // at these low levels; 0% shows an empty battery.
+            const levelWidth = 7.9 * Math.min(1, machine.battery / 20);
+            const level = document.querySelector("#batteryLevel");
+            level.setAttribute("width", Math.max(0.01, levelWidth));
+            level.style.display = machine.battery > 0 ? "" : "none";
+
+            screen.style.setProperty("--shake-time", (0.12 - 0.07 * machine.speed).toFixed(3) + "s");
+
+            // speed handle position (0..1) and value for screen readers
+            screen.style.setProperty("--speed", machine.speed);
+            const speedPicker = document.querySelector("#speedPicker");
+            speedPicker.setAttribute("aria-valuenow", Math.round(machine.speed * 100));
+
+
             // mark the selected option for screen readers
             const options = document.querySelectorAll(".pattern-option");
             for (let i = 0; i < options.length; i++) {
                 const selected = options[i].dataset.pattern === machine.stitchPattern;
                 options[i].setAttribute("aria-pressed", selected);
-                options[i].disabled = !machine.isOn;
             }
 
             drawStitches();
@@ -185,46 +410,49 @@
 
 
         // ---------- STITCH DRAWING ----------
-        // Draws the selected stitch in the pill (small) and in the status bar (large).
-        // All numbers are design pixels measured from the PDFs; "size" scales them.
+        // Draws the selected stitch preview inside the pill.
+        // Numbers are in the pill's original drawing coordinates (measured from the
+        // earlier PDFs); PILL_TRANSFORM scales them up to the new, larger pill
+        // (same 1.10632x scale the CSS applies to the pill). "size" = pinch size.
+        const PILL_TRANSFORM = "translate(-25.976 -93.674) scale(1.10632)";
+
         function drawStitches() {
             const size = machine.stitchSize;
-            let pill = "";
-            let bar = "";
-            let barSoft = false;
+            let stitches = [];   // one entry per stitch, in sewing order (left to right)
 
             if (machine.stitchPattern === "straight") {
-                // pill: row of dashes, centred at x 206.5, y 414.7
-                pill = dashes(206.5, 414.7, 17.4 * size, 21.96 * size, 1.5 * size, 128);
-                // bar: larger dashes centred at x 116, y 279.5
-                bar = dashes(116, 279.5, 29.3 * size, 35 * size, 2 * size, 206);
-                barSoft = true;   // the bar dashes have a soft edge in the design
+                // row of dashes, centred at x 206.5, y 414.7
+                stitches = dashes(206.5, 414.7, 17.4 * size, 21.96 * size, 1.5 * size, 128);
             }
 
             if (machine.stitchPattern === "zigzag") {
-                // pill: whole zigzags centred on x 206.35; the bottom stays at y 425.27
+                // whole zigzags centred on x 206.35; the bottom stays at y 425.27
                 // so a bigger stitch grows upwards, away from the status badge
                 const pillHeight = 11.53 * size;
-                pill = zigzagCentred(206.35, 425.27 - pillHeight / 2, pillHeight, 1.3 * size, 132);
-                // bar: whole zigzags centred on x 108.5, y 276.85
-                bar = zigzagCentred(108.5, 276.85, 20.7 * size, 2 * size, 199);
+                stitches = zigzagCentred(206.35, 425.27 - pillHeight / 2, pillHeight, 1.3 * size, 132);
             }
 
             if (machine.stitchPattern === "button") {
-                pill = fourDots(206.73, 414.13, 3.95 * size, 1.4 * size);
-                bar = fourDots(200.5, 276.5, 9 * size, 2.5 * size);
+                // top-left, top-right, bottom-left, bottom-right
+                stitches = fourDots(206.73, 414.13, 3.95 * size, 1.4 * size);
+            }
+
+            // Sewing or previewing a speed: stitches appear one by one from left to right,
+            // then the row starts again. Paused / stopped: the whole pattern is shown.
+            let visible = stitches.length;
+            if (isSewing() || isPreviewing()) {
+                visible = (Math.floor(machine.stitchesSewn) % stitches.length) + 1;
             }
 
             document.querySelector("#stitchCanvas").innerHTML =
-                // soft edge for the pill preview, like the glow in the design
-                '<defs>' +
-                    '<filter id="soft" filterUnits="userSpaceOnUse" x="110" y="370" width="200" height="90">' +
-                        '<feGaussianBlur stdDeviation="0.3"/></filter>' +
-                    '<filter id="softBar" filterUnits="userSpaceOnUse" x="0" y="240" width="402" height="70">' +
-                        '<feGaussianBlur stdDeviation="0.4"/></filter>' +
-                '</defs>' +
-                '<g fill="#fff" stroke="#fff" stroke-linecap="round" filter="url(#soft)">' + pill + '</g>' +
-                '<g fill="#fff" stroke="#fff" stroke-linecap="round"' + (barSoft ? ' filter="url(#softBar)"' : '') + '>' + bar + '</g>';
+                // soft edge for the preview, like the glow in the design
+                '<defs><filter id="soft" filterUnits="userSpaceOnUse" x="110" y="370" width="200" height="90">' +
+                    '<feGaussianBlur stdDeviation="0.3"/></filter></defs>' +
+                '<g transform="' + PILL_TRANSFORM + '">' +
+                    '<g fill="#fff" stroke="#fff" stroke-linecap="round" filter="url(#soft)">' +
+                        stitches.slice(0, visible).join("") +
+                    '</g>' +
+                '</g>';
         }
 
         // one "/" or "\" stroke
@@ -232,15 +460,17 @@
             return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke-width="' + width + '"/>';
         }
 
-        // zigzag shape (same proportions in pill and bar):
+        // one zigzag = two strokes "/" and "\"
         // period = 1.604 h, each stroke leans 0.512 h, gap between strokes 0.29 h
         function zigzagPeriod(x, cy, h, width) {
             const top = cy - h / 2;
             const bottom = cy + h / 2;
             const lean = 0.512 * h;
             const gap = 0.29 * h;
-            return line(x, bottom, x + lean, top, width) +
-                   line(x + lean + gap, top, x + 2 * lean + gap, bottom, width);
+            return [
+                line(x, bottom, x + lean, top, width),
+                line(x + lean + gap, top, x + 2 * lean + gap, bottom, width)
+            ];
         }
 
         // as many whole zigzags as fit in maxWidth, centred on cx
@@ -249,72 +479,109 @@
             const oneZig = 1.314 * h;   // width of a single "/\"
             const count = Math.max(1, Math.floor((maxWidth - oneZig) / period + 0.001) + 1);
             const total = (count - 1) * period + oneZig;
-            let svg = "";
+            let strokes = [];
             for (let i = 0; i < count; i++) {
-                svg += zigzagPeriod(cx - total / 2 + i * period, cy, h, width);
+                strokes = strokes.concat(zigzagPeriod(cx - total / 2 + i * period, cy, h, width));
             }
-            return svg;
+            return strokes;
         }
 
         // as many whole dashes as fit in maxWidth, centred on cx
         function dashes(cx, cy, length, step, width, maxWidth) {
             const count = Math.max(1, Math.floor((maxWidth - length) / step + 0.001) + 1);
             const total = (count - 1) * step + length;
-            let svg = "";
+            let list = [];
             for (let i = 0; i < count; i++) {
                 const x = cx - total / 2 + i * step;
-                svg += '<line x1="' + x + '" y1="' + cy + '" x2="' + (x + length) + '" y2="' + cy +
-                       '" stroke-width="' + width + '" stroke-linecap="butt"/>';
+                list.push('<line x1="' + x + '" y1="' + cy + '" x2="' + (x + length) + '" y2="' + cy +
+                          '" stroke-width="' + width + '" stroke-linecap="butt"/>');
             }
-            return svg;
+            return list;
         }
 
         // 2 x 2 dots: half = half the distance between dot centres
         function fourDots(cx, cy, half, r) {
-            let svg = "";
             const offsets = [[-half, -half], [half, -half], [-half, half], [half, half]];
+            let list = [];
             for (let i = 0; i < offsets.length; i++) {
-                svg += '<circle cx="' + (cx + offsets[i][0]) + '" cy="' + (cy + offsets[i][1]) + '" r="' + r + '" stroke="none"/>';
+                list.push('<circle cx="' + (cx + offsets[i][0]) + '" cy="' + (cy + offsets[i][1]) + '" r="' + r + '" stroke="none"/>');
             }
-            return svg;
+            return list;
         }
 
 
-        // ---------- INTERACTION 1: LONG PRESS START ----------
+        // ---------- INTERACTION 1: START BUTTON ----------
+        // Hold 1 second  = turn the machine on / off.
+        // Short press    = start / pause sewing (only when the machine is on).
         const startButton = document.querySelector("#startButton");
+        let pressing = false;
 
-        function startHold(event) {
+        function pressStart(event) {
             event.preventDefault();
+            pressing = true;
             startButton.classList.add("is-holding");
             holdTimer = setTimeout(function () {
-                startButton.classList.remove("is-holding");
+                // held long enough: power on / off
                 holdTimer = null;
+                pressing = false;
+                startButton.classList.remove("is-holding");
                 fakeDevice("power");
             }, HOLD_TIME);
         }
 
-        function cancelHold() {
-            startButton.classList.remove("is-holding");
-            if (holdTimer !== null) {
-                clearTimeout(holdTimer);   // released too early: nothing happens
-                holdTimer = null;
+        function releaseStart() {
+            if (!pressing) {
+                return;   // the long press already fired
             }
+            pressing = false;
+            startButton.classList.remove("is-holding");
+            clearTimeout(holdTimer);
+            holdTimer = null;
+            fakeDevice("startPause");   // released before 1 second: short press
         }
 
-        startButton.addEventListener("pointerdown", startHold);
-        startButton.addEventListener("pointerup", cancelHold);
-        startButton.addEventListener("pointerleave", cancelHold);
-        startButton.addEventListener("pointercancel", cancelHold);
+        function cancelPress() {
+            // finger slid off the button: do nothing
+            pressing = false;
+            startButton.classList.remove("is-holding");
+            clearTimeout(holdTimer);
+            holdTimer = null;
+        }
+
+        startButton.addEventListener("pointerdown", pressStart);
+        startButton.addEventListener("pointerup", releaseStart);
+        startButton.addEventListener("pointerleave", cancelPress);
+        startButton.addEventListener("pointercancel", cancelPress);
 
         startButton.addEventListener("keydown", function (event) {
             if ((event.key === " " || event.key === "Enter") && !event.repeat) {
-                startHold(event);
+                pressStart(event);
             }
         });
-        startButton.addEventListener("keyup", cancelHold);
+        startButton.addEventListener("keyup", function (event) {
+            if (event.key === " " || event.key === "Enter") {
+                releaseStart();
+            }
+        });
 
         startButton.addEventListener("contextmenu", function (event) {
             event.preventDefault();
+        });
+
+
+        // "Locked" feedback: the stitch pattern slider gives a short shake
+        // when someone tries to change the pattern while the machine is sewing.
+        const patternSlider = document.querySelector(".slider-pattern");
+
+        function showPatternLocked() {
+            if (patternSlider.classList.contains("is-locked")) {
+                return;   // already shaking (e.g. while dragging): let it finish
+            }
+            patternSlider.classList.add("is-locked");
+        }
+
+        patternSlider.addEventListener("animationend", function () {
+            patternSlider.classList.remove("is-locked");
         });
 
 
@@ -337,9 +604,6 @@
         }
 
         picker.addEventListener("pointerdown", function (event) {
-            if (!machine.isOn) {
-                return;   // machine is off: the selector does nothing
-            }
             dragging = true;
             picker.setPointerCapture(event.pointerId);
             fakeDevice("setPattern", patternAtPointer(event));
@@ -426,6 +690,59 @@
         zoomArea.addEventListener("gesturechange", function (event) {
             event.preventDefault();
             fakeDevice("setStitchSize", gestureStartSize * event.scale);
+        });
+
+
+
+        // ---------- INTERACTION 4: SPEED (STEPLESS) ----------
+        // Drag along the speed slider. Far left (hollow circle) = stopped.
+        // Further right = faster. Works before and after turning the machine on.
+        const speedPicker = document.querySelector("#speedPicker");
+        let draggingSpeed = false;
+
+        function speedAtPointer(event) {
+            const screenBox = document.querySelector(".screen").getBoundingClientRect();
+            const designX = (event.clientX - screenBox.left) / (screenBox.width / 402);
+            // the handle is 11 wide, so its left edge sits 5.5 left of the finger
+            let speed = (designX - 5.5 - SPEED_HANDLE_MIN) / SPEED_HANDLE_TRAVEL;
+            if (speed < 0.03) {
+                speed = 0;   // easy to park it on "stopped"
+            }
+            return Math.min(1, speed);
+        }
+
+        speedPicker.addEventListener("pointerdown", function (event) {
+            draggingSpeed = true;
+            speedPicker.setPointerCapture(event.pointerId);
+            fakeDevice("setSpeed", speedAtPointer(event));
+        });
+
+        speedPicker.addEventListener("pointermove", function (event) {
+            if (draggingSpeed) {
+                fakeDevice("setSpeed", speedAtPointer(event));
+            }
+        });
+
+        function stopSpeedDrag() {
+            draggingSpeed = false;
+        }
+        speedPicker.addEventListener("pointerup", stopSpeedDrag);
+        speedPicker.addEventListener("pointercancel", stopSpeedDrag);
+
+        // keyboard: arrow keys change speed, Home = stop
+        speedPicker.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+                fakeDevice("setSpeed", machine.speed + 0.05);
+            } else if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+                fakeDevice("setSpeed", machine.speed - 0.05 < 0.03 ? 0 : machine.speed - 0.05);
+            } else if (event.key === "Home") {
+                fakeDevice("setSpeed", 0);
+            } else if (event.key === "End") {
+                fakeDevice("setSpeed", 1);
+            } else {
+                return;
+            }
+            event.preventDefault();
         });
 
         render();

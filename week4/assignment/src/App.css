@@ -1,0 +1,6 @@
+/* sidebar + control center side by side, filling the space under the header */
+.container {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}

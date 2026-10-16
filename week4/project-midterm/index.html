@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Handheld Sewing Machine</title>
+
+    <!-- Real phone check: a real phone already shows its own status bar, so the mock-up
+         one is hidden there. Browser developer tools only pretend to be a phone, so the
+         mock-up stays visible when testing on a computer.
+         Add ?statusbar=show or ?statusbar=hide to the address to force it either way. -->
+    <script>
+      (function () {
+        const forced = new URLSearchParams(location.search).get("statusbar");
+        const realIOS = "standalone" in navigator && /iPhone|iPad|iPod/.test(navigator.userAgent);
+        const realAndroid = /Android/.test(navigator.userAgent) && navigator.maxTouchPoints > 0
+                            && !navigator.webdriver && window.outerWidth === window.innerWidth;
+        if (forced === "hide" || (forced !== "show" && (realIOS || realAndroid))) {
+          document.documentElement.classList.add("real-phone");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

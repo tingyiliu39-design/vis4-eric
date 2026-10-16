@@ -1,0 +1,16 @@
+/* global styles (same as week 3) */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a;
+}
+
+#root {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
