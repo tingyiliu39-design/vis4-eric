@@ -1,0 +1,551 @@
+/* ------------------------------------------------------------
+   Handheld Sewing Machine — project interface
+   Built on the 402 x 874 iPhone 17 design.
+   --u = one design pixel. On an iPhone 17 it is exactly 1px;
+   on other screens the whole layout scales to fit.
+   All positions are design coordinates from the top-left of the screen.
+
+   Visual style: soft, low-saturation black / white / grey, like the
+   device itself. Depth comes from light (top-left) and shadow
+   (bottom-right) instead of colour. Hierarchy, strongest first:
+     1. the pill (one raised, lightest surface) with the stitch preview (darkest marks)
+     2. START (raised button in a recessed well)
+     3. battery and status
+     4. the two setting sliders (recessed grooves)
+   No colour at all: surfaces are white and grey, every text and icon is black.
+   ------------------------------------------------------------ */
+
+@font-face {
+    font-family: "Stitch Display";
+    src: url("./assets/fonts/stitch-display-regular.otf") format("opentype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Stitch Display";
+    src: url("./assets/fonts/stitch-display-bold.otf") format("opentype");
+    font-weight: 700;
+}
+
+/* heavier weight for START (made from the regular letters, thickened) */
+@font-face {
+    font-family: "Stitch Display";
+    src: url("./assets/fonts/stitch-display-semibold.otf") format("opentype");
+    font-weight: 600;
+}
+
+/* light weights (thinner strokes) for secondary text: labels, status, battery */
+@font-face {
+    font-family: "Stitch Display";
+    src: url("./assets/fonts/stitch-display-light.otf") format("opentype");
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: "Stitch Text";
+    src: url("./assets/fonts/stitch-text.otf") format("opentype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Stitch Text";
+    src: url("./assets/fonts/stitch-text-light.otf") format("opentype");
+    font-weight: 300;
+}
+
+/* extra-light, for the battery readout */
+@font-face {
+    font-family: "Stitch Text";
+    src: url("./assets/fonts/stitch-text-thin.otf") format("opentype");
+    font-weight: 200;
+}
+
+:root {
+    --u: min(calc(100vw / 402), calc(100vh / 874));
+
+    /* greys, light to dark */
+    --background: #e8e8e8;
+    --surface-light: #f6f6f6;      /* lit side of raised parts */
+    --surface-dark: #dcdcdc;       /* shaded side of raised parts */
+    --groove: #e0e0e0;             /* recessed parts */
+    --ink: #000000;                /* every text and icon: one black */
+
+    /* light and shadow (light comes from the top-left) */
+    --highlight: rgba(255, 255, 255, 0.9);
+    --shade: rgba(0, 0, 0, 0.13);
+    --shade-strong: rgba(0, 0, 0, 0.2);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+    background-color: var(--background);
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* 402 x 874 phone screen */
+.screen {
+    position: relative;
+    width: calc(402 * var(--u));
+    height: calc(874 * var(--u));
+    background-color: var(--background);
+    font-family: "Stitch Display", sans-serif;
+}
+
+/* everything inside the screen is placed with design coordinates */
+.screen > *,
+.card > * {
+    position: absolute;
+}
+
+/* ---------- Title ---------- */
+.title {
+    left: calc(26 * var(--u));
+    top: calc(56.5 * var(--u));     /* clear of the status bar */
+    margin: 0;
+    font-size: calc(32 * var(--u));
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--ink);
+    white-space: nowrap;
+    /* pressed into the surface */
+    text-shadow: 0 calc(1 * var(--u)) 0 var(--highlight);
+}
+
+/* ---------- Groups ---------- */
+/* No more filled cards: the groups are just positioning boxes.
+   They are 0 x 0 at the top-left corner, so everything inside them
+   uses plain screen coordinates and they never block a touch. */
+.card {
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+}
+
+/* ---------- Labels ---------- */
+.card-label {
+    margin: 0;
+    font-size: calc(25.6 * var(--u));
+    font-weight: 300;               /* secondary text: light */
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--ink);
+    white-space: nowrap;
+}
+
+.label-pattern { left: calc(21 * var(--u));  top: calc(109 * var(--u)); }
+.label-speed   { left: calc(267 * var(--u)); top: calc(109 * var(--u)); }
+
+/* ---------- Option dots ---------- */
+/* Each dot row is an SVG the size of the whole screen, so the circles use
+   screen coordinates (cx, cy, r in the JSX). SVG keeps every dot the same
+   size and centred on the same line when scaled. */
+.options {
+    left: 0;
+    top: 0;
+    width: calc(402 * var(--u));
+    height: calc(874 * var(--u));
+    overflow: visible;
+    pointer-events: none;
+    fill: var(--ink);
+}
+
+/* zero-speed marker: hollow ring */
+.options .dot-off {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 0.8;
+}
+
+/* ---------- Sliders: recessed grooves ---------- */
+.slider {
+    width: calc(140 * var(--u));
+    height: calc(48 * var(--u));
+    border-radius: calc(24 * var(--u));
+    background: linear-gradient(145deg, #dadada, #ebebeb);
+    box-shadow:
+        inset calc(3 * var(--u)) calc(3 * var(--u)) calc(6 * var(--u)) var(--shade),
+        inset calc(-3 * var(--u)) calc(-3 * var(--u)) calc(6 * var(--u)) var(--highlight);
+}
+
+.slider-pattern { left: calc(31 * var(--u));  top: calc(173 * var(--u)); }
+.slider-speed   { left: calc(230 * var(--u)); top: calc(173 * var(--u)); }
+
+/* raised handle. Its centre is 5.5 right of its left edge (as before);
+   it is drawn 15 wide, so it starts 2 further left. */
+.slider-handle {
+    position: absolute;
+    top: calc(5 * var(--u));
+    width: calc(15 * var(--u));
+    height: calc(38 * var(--u));
+    margin-left: calc(-2 * var(--u));
+    border-radius: calc(7.5 * var(--u));
+    background: linear-gradient(145deg, var(--surface-light), #d6d6d6);
+    box-shadow:
+        calc(2 * var(--u)) calc(3 * var(--u)) calc(5 * var(--u)) var(--shade-strong),
+        calc(-1 * var(--u)) calc(-1 * var(--u)) calc(2 * var(--u)) var(--highlight),
+        inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.8);
+}
+
+/* handle positions are relative to their track */
+/* speed handle: x 248 (stopped) to x 341 (fastest); --speed (0..1) is set in App.jsx */
+.handle-speed { left: calc((248 - 230 + 93 * var(--speed, 0)) * var(--u)); }
+
+/* ---------- Pill + start button ---------- */
+/* The pill keeps its original 175 x 515.5 drawing (and everything inside it)
+   and is scaled up 1.10632x from its top-left corner at (106.23, 256.57).
+   Positions inside the pill use the original numbers. */
+.pill {
+    left: calc(106.23 * var(--u));
+    top: calc(256.57 * var(--u));
+    transform: scale(1.10632);
+    transform-origin: 0 0;
+    width: calc(175 * var(--u));
+    height: calc(515.5 * var(--u));
+    border-radius: calc(87.5 * var(--u));
+    background: linear-gradient(160deg, #f7f7f7 0%, #e9e9e9 55%, #dfdfdf 100%);
+    box-shadow:
+        calc(-9 * var(--u)) calc(-9 * var(--u)) calc(18 * var(--u)) var(--highlight),
+        calc(10 * var(--u)) calc(12 * var(--u)) calc(24 * var(--u)) rgba(0, 0, 0, 0.17),
+        inset calc(1 * var(--u)) calc(1 * var(--u)) calc(1 * var(--u)) rgba(255, 255, 255, 0.95),
+        inset calc(-1 * var(--u)) calc(-1 * var(--u)) calc(2 * var(--u)) rgba(0, 0, 0, 0.06);
+}
+
+/* START: a recessed well with a raised round button in it */
+.start-button {
+    position: absolute;
+    /* well centre (207.7, 759.05) in the original design, diameter 75 — relative to the pill */
+    left: calc((207.7 - 37.5 - 119.5) * var(--u));
+    top: calc((759.05 - 37.5 - 331.5) * var(--u));
+    width: calc(75 * var(--u));
+    height: calc(75 * var(--u));
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #dadada, #eeeeee);
+    box-shadow:
+        inset calc(3 * var(--u)) calc(3 * var(--u)) calc(6 * var(--u)) var(--shade),
+        inset calc(-3 * var(--u)) calc(-3 * var(--u)) calc(6 * var(--u)) var(--highlight);
+    cursor: pointer;
+}
+
+/* raised face of the button */
+.start-button::before {
+    content: "";
+    position: absolute;
+    left: calc(7 * var(--u));
+    top: calc(7 * var(--u));
+    width: calc(61 * var(--u));
+    height: calc(61 * var(--u));
+    border-radius: 50%;
+    background: linear-gradient(145deg, #fbfbfb, #dedede);
+    box-shadow:
+        calc(3 * var(--u)) calc(4 * var(--u)) calc(7 * var(--u)) var(--shade-strong),
+        calc(-2 * var(--u)) calc(-2 * var(--u)) calc(4 * var(--u)) var(--highlight),
+        inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.9);
+    transition: box-shadow 0.15s ease;
+}
+
+.start-label {
+    position: relative;
+    left: calc(-0.45 * var(--u));   /* -0.75, plus half the extra letter spacing */
+    top: calc(-0.7 * var(--u));
+    display: block;
+    font-family: "Stitch Display", sans-serif;
+    font-size: calc(18.33 * var(--u));
+    font-weight: 600;               /* the main control: bold */
+    letter-spacing: calc(0.6 * var(--u));   /* the thicker letters keep the same gaps */
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--ink);
+    transform: rotate(90deg);       /* reads top to bottom, like the other display text */
+}
+
+/* ---------- Device display (only visible when the machine is on) ---------- */
+/* positions are design coordinates minus the pill's top-left (119.5, 331.5) */
+.display {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+/* status badge and battery readout show whenever the machine is on */
+.screen.is-on .status-badge,
+.screen.is-on .battery-readout {
+    opacity: 1;
+}
+
+/* ---------- Stitch pattern selector ---------- */
+/* handle moves under the selected pattern's dot icon (left = handle centre - 5.5 - track x 31) */
+.handle-pattern {
+    transition: left 0.25s ease;
+}
+
+.screen[data-pattern="straight"] .handle-pattern { left: calc((44.25 - 31) * var(--u)); }
+.screen[data-pattern="zigzag"]   .handle-pattern { left: calc((95.25 - 31) * var(--u)); }
+.screen[data-pattern="button"]   .handle-pattern { left: calc((144.25 - 31) * var(--u)); }
+
+/* invisible tap area over the dots + slider, split into 3 columns
+   (covers screen x 5–199, y 112–226) */
+.pattern-picker {
+    left: calc(5 * var(--u));
+    top: calc(112 * var(--u));
+    width: calc(194 * var(--u));
+    height: calc(114 * var(--u));
+    display: flex;
+    touch-action: none;
+}
+
+.pattern-option {
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+
+.pattern-option:focus {
+    outline: none;
+}
+
+.pattern-option:focus-visible {
+    outline: calc(1.5 * var(--u)) solid var(--ink);
+    outline-offset: calc(-3 * var(--u));
+    border-radius: calc(5 * var(--u));
+}
+
+/* column widths split halfway between the handle positions */
+.option-straight { width: calc((75.25 - 5) * var(--u)); }
+.option-zigzag   { width: calc((125.25 - 75.25) * var(--u)); }
+.option-button   { width: calc((199 - 125.25) * var(--u)); }
+
+/* ---------- Long-press feedback on START ---------- */
+.start-button {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+}
+
+.start-button:focus {
+    outline: none;
+}
+
+.start-button:focus-visible {
+    outline: calc(1.5 * var(--u)) solid var(--ink);
+    outline-offset: calc(2 * var(--u));
+}
+
+/* the face sinks in while holding */
+.start-button.is-holding::before {
+    box-shadow:
+        inset calc(2 * var(--u)) calc(3 * var(--u)) calc(6 * var(--u)) rgba(0, 0, 0, 0.16),
+        inset calc(-2 * var(--u)) calc(-2 * var(--u)) calc(4 * var(--u)) var(--highlight);
+}
+
+/* ---------- Stitch drawing (pill preview) ---------- */
+/* one SVG over the whole screen, drawn in design coordinates (viewBox 0 0 402 874).
+   The pill moved up 16.5px in this layout, so the drawing moves with it. */
+.stitch-canvas {
+    left: 0;
+    top: calc(-16.5 * var(--u));
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.screen.is-on .stitch-canvas {
+    opacity: 1;
+}
+
+/* ---------- Pinch-to-resize area ---------- */
+/* circle centre (201.93, 355.6), radius 80.8 */
+.zoom-area {
+    left: calc((201.93 - 80.8) * var(--u));
+    top: calc((355.6 - 80.8) * var(--u));
+    width: calc(161.6 * var(--u));
+    height: calc(161.6 * var(--u));
+    border-radius: 50%;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* only catches gestures while the machine is on */
+.screen.is-on .zoom-area {
+    pointer-events: auto;
+}
+
+/* ---------- iPhone status bar (mock-up) ---------- */
+/* 402 x 62 strip at the top of the screen, drawn in design pixels */
+.ios-status-bar {
+    left: 0;
+    top: 0;
+    width: calc(402 * var(--u));
+    height: calc(62 * var(--u));
+    pointer-events: none;
+}
+
+/* a real phone shows its own status bar (class set by the check in index.html <head>) */
+.real-phone .ios-status-bar {
+    display: none;
+}
+
+.ios-time {
+    fill: var(--ink);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+/* ---------- Speed selector ---------- */
+/* invisible drag area over the speed dots + slider (screen x 204–397, y 140–226) */
+.speed-picker {
+    left: calc(204 * var(--u));
+    top: calc(140 * var(--u));
+    width: calc(193 * var(--u));
+    height: calc(86 * var(--u));
+    touch-action: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.speed-picker:focus-visible {
+    outline: calc(1.5 * var(--u)) solid var(--ink);
+    outline-offset: calc(-3 * var(--u));
+    border-radius: calc(5 * var(--u));
+}
+
+/* ---------- Running: the device shakes slightly left and right ---------- */
+/* --shake-time is set in App.jsx: 0.12s when slow, 0.05s at full speed.
+   Uses the separate `translate` property so the pill's scale() is kept. */
+@keyframes shake {
+    0%, 100% { translate: 0 0; }
+    25%      { translate: calc(-0.8 * var(--u)) 0; }
+    75%      { translate: calc(0.8 * var(--u)) 0; }
+}
+
+.screen.is-running .pill,
+.screen.is-running .stitch-canvas {
+    animation: shake var(--shake-time, 0.12s) linear infinite;
+}
+
+/* respect the system setting for less motion */
+@media (prefers-reduced-motion: reduce) {
+    .screen.is-running .pill,
+    .screen.is-running .stitch-canvas {
+        animation: none;
+    }
+}
+
+/* ---------- Status badge (real text) ---------- */
+/* small recessed chip: pill coordinates (22.84, 159.97), 128.28 x 25.21 */
+/* vertical layout: the badge stands upright in the middle of the pill
+   (centre 87.5, 235.6), turned 90deg so its text reads top to bottom */
+.status-badge {
+    left: calc(23.36 * var(--u));
+    top: calc(222.99 * var(--u));
+    transform: rotate(90deg);
+    width: calc(128.28 * var(--u));
+    height: calc(25.21 * var(--u));
+    border-radius: calc(12.6 * var(--u));
+    background: linear-gradient(145deg, #dcdcdc, #eaeaea);
+    box-shadow:
+        inset calc(1.5 * var(--u)) calc(1.5 * var(--u)) calc(3 * var(--u)) rgba(0, 0, 0, 0.12),
+        inset calc(-1.5 * var(--u)) calc(-1.5 * var(--u)) calc(3 * var(--u)) var(--highlight);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-text {
+    position: relative;
+    left: calc(-0.68 * var(--u));
+    top: calc(-1.02 * var(--u));   /* centre the capitals, not the line box */
+    font-family: "Stitch Text", sans-serif;
+    font-size: calc(26 * var(--u));
+    font-weight: 300;               /* secondary text: light */
+    line-height: 1;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+    color: var(--ink);
+}
+
+/* two-line warning uses smaller text */
+.two-line-warning .status-text {
+    top: calc(0.4 * var(--u));
+    font-size: calc(12.66 * var(--u));
+    line-height: 0.79;
+    color: var(--ink);
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.15; }
+}
+
+.screen.is-on.show-warning .status-badge {
+    animation: blink 0.9s ease-in-out infinite;
+}
+
+/* ---------- Battery readout (real text + drawn icon) ---------- */
+.battery-readout {
+    left: 0;
+    top: 0;
+    width: calc(175 * var(--u));
+    height: calc(515.5 * var(--u));
+    overflow: visible;
+    color: var(--ink);             /* the icon and % sign use currentColor */
+}
+
+.battery-digits {
+    font-family: "Stitch Text", sans-serif;
+    font-weight: 200;               /* secondary information: extra-light */
+    font-size: 83.2px;          /* in pill units: the 0 is 37.5 tall like the design */
+    fill: var(--ink);
+}
+
+/* ---------- Pattern locked while sewing: short "no" shake ---------- */
+@keyframes locked-shake {
+    0%, 100% { translate: 0 0; }
+    15%      { translate: calc(-3 * var(--u)) 0; }
+    35%      { translate: calc(3 * var(--u)) 0; }
+    55%      { translate: calc(-2 * var(--u)) 0; }
+    75%      { translate: calc(1.5 * var(--u)) 0; }
+}
+
+.slider-pattern.is-locked {
+    animation: locked-shake 0.4s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .slider-pattern.is-locked {
+        animation: locked-blink 0.4s ease-out;
+    }
+
+    @keyframes locked-blink {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0.5; }
+    }
+}
